@@ -1,6 +1,6 @@
 package com.example.animal_adoption.model
 
-data class User(
+data class UserDTO(
     val id: Integer,
     val username: String,
     val password: String,

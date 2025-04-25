@@ -1,7 +1,6 @@
-package com.example.animal_adoption
+package com.example.animal_adoption.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,11 +20,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -33,7 +29,7 @@ import com.example.animal_adoption.viewmodel.LoginMessageUiState
 import com.example.animal_adoption.viewmodel.RemoteUserViewModel
 
 @Composable
-fun UserLogin(
+fun UserRegister(
     navController: NavHostController,
     remoteViewModel: RemoteUserViewModel
 ) {
@@ -50,7 +46,7 @@ fun UserLogin(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Welcome to Login", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+        Text(text = "Welcome to Register", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -76,22 +72,22 @@ fun UserLogin(
 
         Button(onClick = {
             errorMessage = ""
-            remoteViewModel.login(username, password) { id ->
-                navController.navigate("Home/$id")
+            remoteViewModel.register(username, password) { id ->
+                navController.navigate("UserHome/$id")
             }
             connectMessage = true
         }) {
-            Text(text = "Login")
+            Text(text = "Register")
         }
 
         when (loginMessageUiState) {
             is LoginMessageUiState.Success -> {
                 LaunchedEffect(Unit) {
-                    navController.navigate("Home")
+                    navController.navigate("UserHome")
                 }
             }
             is LoginMessageUiState.Error -> {
-                errorMessage = "Login failed. Please check your username or password."
+                errorMessage = "Register failed. Please check your username or password."
             }
             is LoginMessageUiState.Loading -> {
                 if (connectMessage) {

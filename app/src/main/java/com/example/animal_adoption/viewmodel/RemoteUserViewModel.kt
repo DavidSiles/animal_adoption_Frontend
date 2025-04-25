@@ -3,7 +3,7 @@ package com.example.animal_adoption.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.animal_adoption.model.User
+import com.example.animal_adoption.model.UserDTO
 import com.example.animal_adoption.model.UserLoginRequest
 import com.example.animal_adoption.model.UserRegisterRequest
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,31 +17,31 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 
 sealed interface RemoteMessageUiState {
-    data class Success(val remoteMessage: List<User>) : RemoteMessageUiState
+    data class Success(val remoteMessage: List<UserDTO>) : RemoteMessageUiState
 
     object Error : RemoteMessageUiState
     object Loading : RemoteMessageUiState
 }
 
 sealed interface LoginMessageUiState {
-    data class Success(val loginMessage: User) : LoginMessageUiState
+    data class Success(val loginMessage: UserDTO) : LoginMessageUiState
 
     object Error : LoginMessageUiState
     object Loading : LoginMessageUiState
 }
 
 interface RemoteUserInterface {
-    @GET("user/index")
-    suspend fun getRemoteUser(): List<User>
+    @GET("users/index")
+    suspend fun getRemoteUser(): List<UserDTO>
 
-    @GET("user/{username}")
-    suspend fun getUserByUsername(@Path("username") username: String): User
+    @GET("users/{username}")
+    suspend fun getUserByUsername(@Path("username") username: String): UserDTO
 
-    @POST("user/login")
-    suspend fun login(@Body loginRequest: UserLoginRequest): User
+    @POST("users/login")
+    suspend fun login(@Body loginRequest: UserLoginRequest): UserDTO
 
-    @POST("user/new")
-    suspend fun register(@Body registerRequest: UserRegisterRequest): User
+    @POST("users/create")
+    suspend fun register(@Body registerRequest: UserRegisterRequest): UserDTO
 }
 
 class RemoteUserViewModel : ViewModel() {
@@ -105,12 +105,12 @@ class RemoteUserViewModel : ViewModel() {
             _loginMessageUiState.value = com.example.animal_adoption.viewmodel.LoginMessageUiState.Loading
             try {
                 val registerRequest = UserRegisterRequest(username = username, password = password)
-                val nurse = remoteService.register(registerRequest)
-                _id.value = nurse.id  // Guardamos el ID del enfermero
-                _loginMessageUiState.value = com.example.animal_adoption.viewmodel.LoginMessageUiState.Success(nurse)
+                val user = remoteService.register(registerRequest)
+                _id.value = user.id  // Guardamos el ID del enfermero
+                _loginMessageUiState.value = com.example.animal_adoption.viewmodel.LoginMessageUiState.Success(user)
 
                 // Pasamos el nurseId al callback de éxito
-                onSuccess(nurse.id)
+                onSuccess(user.id)
             } catch (e: Exception) {
                 Log.e("Register", "Error during registration: ${e.message}", e)
                 _loginMessageUiState.value = com.example.animal_adoption.viewmodel.LoginMessageUiState.Error
@@ -119,7 +119,7 @@ class RemoteUserViewModel : ViewModel() {
     }
 
     // Función para obtener los detalles del enfermero por ID
-    fun getUserByUsername(username: String, onSuccess: (User) -> Unit, onFailure: () -> Unit) {
+    fun getUserByUsername(username: String, onSuccess: (UserDTO) -> Unit, onFailure: () -> Unit) {
         viewModelScope.launch {
             try {
                 val nurse = remoteService.getUserByUsername(username)  // Realizamos la petición GET
