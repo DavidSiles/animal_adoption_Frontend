@@ -31,9 +31,9 @@ import com.example.animal_adoption.viewmodel.RemoteUserViewModel
 @Composable
 fun UserLogin(
     navController: NavHostController,
-    remoteViewModel: RemoteUserViewModel
+    remoteUserViewModel: RemoteUserViewModel
 ) {
-    val loginMessageUiState by remoteViewModel.loginMessageUiState.collectAsState()
+    val loginMessageUiState by remoteUserViewModel.loginMessageUiState.collectAsState()
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -72,7 +72,7 @@ fun UserLogin(
 
         Button(onClick = {
             errorMessage = ""
-            remoteViewModel.login(username, password) { id ->
+            remoteUserViewModel.login(username, password) { id ->
                 navController.navigate("Home/$id")
             }
             connectMessage = true

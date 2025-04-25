@@ -1,5 +1,6 @@
 package com.example.animal_adoption.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -31,9 +32,9 @@ import com.example.animal_adoption.viewmodel.RemoteUserViewModel
 @Composable
 fun UserRegister(
     navController: NavHostController,
-    remoteViewModel: RemoteUserViewModel
+    remoteUserViewModel: RemoteUserViewModel
 ) {
-    val loginMessageUiState by remoteViewModel.loginMessageUiState.collectAsState()
+    val loginMessageUiState by remoteUserViewModel.loginMessageUiState.collectAsState()
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -72,7 +73,9 @@ fun UserRegister(
 
         Button(onClick = {
             errorMessage = ""
-            remoteViewModel.register(username, password) { id ->
+            remoteUserViewModel.register(username, password) { id ->
+                Log.e("Navigating to UserHome with ID", "Navigating to UserHome with ID: $id")
+                println("Navigating to UserHome with ID: $id")
                 navController.navigate("UserHome/$id")
             }
             connectMessage = true
@@ -82,9 +85,7 @@ fun UserRegister(
 
         when (loginMessageUiState) {
             is LoginMessageUiState.Success -> {
-                LaunchedEffect(Unit) {
-                    navController.navigate("UserHome")
-                }
+                Text(text = "Registration successful!", color = Color.Green, fontSize = 16.sp, modifier = Modifier.padding(top = 8.dp))
             }
             is LoginMessageUiState.Error -> {
                 errorMessage = "Register failed. Please check your username or password."
@@ -101,10 +102,6 @@ fun UserRegister(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        Text(text = "Don't have an account yet? Click below to register")
-
-        Spacer(modifier = Modifier.height(10.dp))
 
         /*
         Button(onClick = { navController.navigate("registerScreen") }) {

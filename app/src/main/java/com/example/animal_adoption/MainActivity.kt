@@ -21,14 +21,14 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 NavHost(navController = navController, startDestination = "UserRegister") {
                     composable("UserLogin") {
-                        UserLogin(navController = navController, remoteViewModel = viewModel())
+                        UserLogin(navController = navController, remoteUserViewModel = viewModel())
                     }
                     composable("UserHome/{id}") { backStackEntry ->
                         val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
                         UserHome(navController = navController, id = id)
                     }
                     composable("UserRegister") { backStackEntry ->
-                        UserRegister(navController = navController, remoteViewModel = viewModel())
+                        UserRegister(navController = navController, remoteUserViewModel = viewModel())
                     }
                 }
             }
