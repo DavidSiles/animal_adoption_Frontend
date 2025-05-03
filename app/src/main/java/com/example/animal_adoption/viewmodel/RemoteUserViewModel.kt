@@ -54,17 +54,19 @@ class RemoteUserViewModel : ViewModel() {
         com.example.animal_adoption.viewmodel.LoginMessageUiState.Loading)
     var loginMessageUiState: StateFlow<com.example.animal_adoption.viewmodel.LoginMessageUiState> = _loginMessageUiState
 
+    //ip del emulador
     val connection = Retrofit.Builder()
-        .baseUrl("http://192.168.2.1:8080/")
+        .baseUrl("http://10.0.2.2:8080/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
+
 
     private val remoteService = connection.create(com.example.animal_adoption.viewmodel.RemoteUserInterface::class.java)
 
     private val _id = MutableStateFlow<Integer?>(null)
     val id: StateFlow<Integer?> = _id
 
-    // Get all Nurses
+    // Get all users
     fun getRemoteUser() {
         viewModelScope.launch {
             _remoteMessageUiState.value = com.example.animal_adoption.viewmodel.RemoteMessageUiState.Loading

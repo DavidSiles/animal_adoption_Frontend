@@ -11,7 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.animal_adoption.screens.UserLogin
 import com.example.animal_adoption.screens.UserHome
 import com.example.animal_adoption.screens.UserRegister
-
+import com.example.animal_adoption.screens.UserProfile
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,6 +27,11 @@ class MainActivity : ComponentActivity() {
                         val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
                         UserHome(navController = navController, id = id)
                     }
+                    composable("UserProfile/{id}") { backStackEntry ->
+                        val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
+                        UserProfile(navController = navController, id = id)
+                    }
+
                     composable("UserRegister") { backStackEntry ->
                         UserRegister(navController = navController, remoteUserViewModel = viewModel())
                     }
