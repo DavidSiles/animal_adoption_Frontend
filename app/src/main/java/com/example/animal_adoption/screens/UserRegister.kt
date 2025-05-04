@@ -47,7 +47,7 @@ fun UserRegister(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Welcome to Register", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+        Text(text = "Welcome to User Register", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -103,10 +103,8 @@ fun UserRegister(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        /*
-        Button(onClick = { navController.navigate("registerScreen") }) {
-            Text(text = stringResource(id = R.string.registerButton))
+        Button(onClick = { navController.navigate("UserLogin") }) {
+            Text(text = "Go to Login")
         }
-        */
     }
 }

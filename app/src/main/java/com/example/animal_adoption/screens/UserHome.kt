@@ -160,7 +160,7 @@ fun UserHome(navController: NavHostController, id: Int?) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Button(
-                onClick = { navController.navigate("Home/$id") },
+                onClick = { navController.navigate("UserHome/$id") },
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 modifier = Modifier.padding(horizontal = 8.dp)
             ) {
@@ -201,7 +201,7 @@ fun UserHome(navController: NavHostController, id: Int?) {
                 modifier = Modifier.padding(horizontal = 8.dp)
             ) {
                 Text(
-                    text = "Me",
+                    text = "Profile",
                     color = Color(0xFF666666),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold
