@@ -5,3 +5,13 @@ data class ShelterDTO (
     val sheltername: String,
     val password: String,
 )
+
+data class ShelterLoginRequest(
+    val sheltername: String,
+    val password: String
+)
+
+data class ShelterRegisterRequest(
+    val sheltername: String,
+    val password: String,
+)
