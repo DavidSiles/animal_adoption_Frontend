@@ -42,6 +42,7 @@ interface RemoteUserInterface {
 
     @POST("users/create")
     suspend fun register(@Body registerRequest: UserRegisterRequest): UserDTO
+
 }
 
 class RemoteUserViewModel : ViewModel() {
