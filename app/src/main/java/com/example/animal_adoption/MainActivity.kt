@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.animal_adoption.screens.FirsScreen
+import com.example.animal_adoption.screens.ShelterCreateAnimal
 import com.example.animal_adoption.screens.ShelterLogin
 import com.example.animal_adoption.screens.ShelterRegister
 import com.example.animal_adoption.screens.ShelterHome
@@ -18,6 +19,7 @@ import com.example.animal_adoption.screens.UserLogin
 import com.example.animal_adoption.screens.UserHome
 import com.example.animal_adoption.screens.UserRegister
 import com.example.animal_adoption.screens.UserProfile
+import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,6 +60,10 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("ShelterRegister") { backStackEntry ->
                         ShelterRegister(navController = navController, remoteShelterViewModel = viewModel())
+                    }
+                    composable("ShelterCreateAnimal/{id}") { backStackEntry ->
+                        val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
+                        ShelterCreateAnimal(navController = navController, remoteShelterViewModel = viewModel(), id = id)
                     }
                 }
             }
