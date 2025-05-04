@@ -2,12 +2,17 @@ package com.example.animal_adoption.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +44,20 @@ fun UserLogin(
     var errorMessage by remember { mutableStateOf("") }
     var connectMessage by remember { mutableStateOf(false) }
 
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.Start
+    ) {
+        IconButton(onClick = { navController.popBackStack() }) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Back"
+            )
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -46,7 +65,7 @@ fun UserLogin(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Welcome to Login", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+        Text(text = "Welcome to User Login", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -106,10 +125,10 @@ fun UserLogin(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        /*
-        Button(onClick = { navController.navigate("registerScreen") }) {
-            Text(text = stringResource(id = R.string.registerButton))
+
+        Button(onClick = { navController.navigate("UserRegister") }) {
+            Text(text = "Go to Register")
         }
-        */
+
     }
 }
