@@ -79,8 +79,8 @@ class RemoteShelterViewModel : ViewModel() {
 
     private val remoteService = connection.create(RemoteShelterInterface::class.java)
 
-    private val _id = MutableStateFlow<Int?>(null)
-    val id: StateFlow<Int?> = _id
+    private val _id = MutableStateFlow<Integer?>(null)
+    val id: StateFlow<Integer?> = _id
 
     // Get all sheter
     fun getRemoteShelter() {
@@ -99,7 +99,7 @@ class RemoteShelterViewModel : ViewModel() {
     }
 
     // Login
-    fun ShelterLogin(sheltername: String, password: String, onSuccess: (Int) -> Unit) {
+    fun ShelterLogin(sheltername: String, password: String, onSuccess: (Integer) -> Unit) {
         viewModelScope.launch {
             _loginMessageUiState.value = ShelterLoginMessageUiState.Loading
             try {
@@ -118,7 +118,7 @@ class RemoteShelterViewModel : ViewModel() {
     }
 
     // Registro
-    fun ShelterRegister(sheltername: String, password: String, onSuccess: (Int) -> Unit) {
+    fun ShelterRegister(sheltername: String, password: String, onSuccess: (Integer) -> Unit) {
         viewModelScope.launch {
             _loginMessageUiState.value = ShelterLoginMessageUiState.Loading
             try {
@@ -150,7 +150,7 @@ class RemoteShelterViewModel : ViewModel() {
     }
 
     // Create new animal with shelter
-    fun CreateNewAnimal(reiac: Int?, name: String, onSuccess: () -> Unit) {
+    fun CreateNewAnimal(reiac: Int, name: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
             _createNewAnimalMessageUiState.value = CreateNewAnimalMessageUiState.Loading
             try {

@@ -28,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -100,7 +99,7 @@ fun ShelterCreateAnimal(
         Button(onClick = {
             errorMessage = ""
             // Conversión segura de texto a entero para usarlo
-            val reiac: Int? = reiacText.toIntOrNull()
+            val reiac: Int = reiacText.toIntOrNull()!!
             Log.e("REIAC", "Este es el valor del reiac: $reiac")
             remoteShelterViewModel.CreateNewAnimal(reiac, name) {
                 navController.navigate("ShelterHome/$id")
