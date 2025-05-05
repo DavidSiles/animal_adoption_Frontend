@@ -44,14 +44,14 @@ data class Dog(val name: String, val age: Int, val description: String, val imag
 fun UserHome(navController: NavHostController, id: Int?) {
     // Comprobamos si el userId es null
     if (id == null) {
-        Log.e("Home", "User ID is null, can't navigate or display user data.")
+        Log.e("UserHome", "User ID is null, can't navigate or display user data.")
         return
     }
 
     // Navegar a la pantalla correcta cuando se entra al HomeScreen
     LaunchedEffect(id) {
         try {
-            navController.navigate("Home/$id")
+            navController.navigate("UserHome/$id")
         } catch (e: Exception) {
             Log.e("Login", "Navigation failed: ${e.message}")
         }
