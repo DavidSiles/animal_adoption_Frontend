@@ -28,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -68,6 +67,8 @@ fun ShelterCreateAnimal(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text(text = "ID user $id")
+
         Text(text = "Create New Animal", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black)
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -100,10 +101,9 @@ fun ShelterCreateAnimal(
         Button(onClick = {
             errorMessage = ""
             // Conversión segura de texto a entero para usarlo
-            val reiac: Int? = reiacText.toIntOrNull()
+            val reiac: Int = reiacText.toIntOrNull()!!
             Log.e("REIAC", "Este es el valor del reiac: $reiac")
-            remoteShelterViewModel.CreateNewAnimal(reiac, name) {
-                navController.navigate("ShelterHome/$id")
+            remoteShelterViewModel.CreateNewAnimal(reiac, name){
             }
             connectMessage = true
         }) {
@@ -113,6 +113,7 @@ fun ShelterCreateAnimal(
         when (createNewAnimalMessageUiState) {
             is CreateNewAnimalMessageUiState.Success -> {
                 Text(text = "Create animal successful!", color = Color.Green, fontSize = 16.sp, modifier = Modifier.padding(top = 8.dp))
+                navController.navigate("ShelterHome/$id")
             }
             is CreateNewAnimalMessageUiState.Error -> {
                 errorMessage = "create animal failed. Please check the reiac or name."
