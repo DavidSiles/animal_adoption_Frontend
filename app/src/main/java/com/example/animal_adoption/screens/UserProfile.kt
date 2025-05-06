@@ -55,46 +55,7 @@ fun UserProfile(navController: NavHostController, id: Int?) {
                 .padding(top = 16.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Profile picture (placeholder)
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFE0E0E0))
-                    .border(2.dp, Color(0xFF0095F6), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = userName.first().toString(),
-                    fontSize = 32.sp,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
-            }
 
-            // User stats
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                userStats.forEach { (label, count) ->
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = count.toString(),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = Color.Black
-                        )
-                        Text(
-                            text = label,
-                            fontSize = 14.sp,
-                            color = Color(0xFF666666)
-                        )
-                    }
-                }
-            }
         }
 
         // User name and bio
@@ -175,7 +136,7 @@ fun UserProfile(navController: NavHostController, id: Int?) {
             Button(
                 onClick = { navController.navigate("UserHome/$id") }, // Updated to match MainActivity.kt route
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                modifier = Modifier.padding(horizontal = 8.dp)
+                modifier = Modifier.padding(horizontal = 5.dp)
             ) {
                 Text(
                     text = "Home",
@@ -187,7 +148,7 @@ fun UserProfile(navController: NavHostController, id: Int?) {
             Button(
                 onClick = { navController.navigate("Search/$id") },
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                modifier = Modifier.padding(horizontal = 8.dp)
+                modifier = Modifier.padding(horizontal = 5.dp)
             ) {
                 Text(
                     text = "Search",
@@ -199,7 +160,7 @@ fun UserProfile(navController: NavHostController, id: Int?) {
             Button(
                 onClick = { navController.navigate("Likes/$id") },
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                modifier = Modifier.padding(horizontal = 8.dp)
+                modifier = Modifier.padding(horizontal = 5.dp)
             ) {
                 Text(
                     text = "Likes",
@@ -211,7 +172,7 @@ fun UserProfile(navController: NavHostController, id: Int?) {
             Button(
                 onClick = { navController.navigate("UserProfile/$id") },
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                modifier = Modifier.padding(horizontal = 8.dp)
+                modifier = Modifier.padding(horizontal = 5.dp)
             ) {
                 Text(
                     text = "Me",

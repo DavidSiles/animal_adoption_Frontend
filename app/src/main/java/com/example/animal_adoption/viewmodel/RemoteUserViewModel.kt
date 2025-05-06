@@ -55,7 +55,8 @@ class RemoteUserViewModel : ViewModel() {
         com.example.animal_adoption.viewmodel.LoginMessageUiState.Loading)
     var loginMessageUiState: StateFlow<com.example.animal_adoption.viewmodel.LoginMessageUiState> = _loginMessageUiState
 
-    //ip del emulador
+    //ip del emulador 10.0.0.2.
+    //ip del movil DavidSiles 10.0.22.100
     val connection = Retrofit.Builder()
         .baseUrl("http://10.0.22.100:8080/")
         .addConverterFactory(GsonConverterFactory.create())
