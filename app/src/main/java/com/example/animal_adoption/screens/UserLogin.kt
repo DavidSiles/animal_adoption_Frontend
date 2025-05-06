@@ -101,9 +101,7 @@ fun UserLogin(
 
         when (loginMessageUiState) {
             is LoginMessageUiState.Success -> {
-                LaunchedEffect(Unit) {
-                    navController.navigate("UserHome")
-                }
+                Text(text = "Login Ok", color = Color.Green, fontSize = 16.sp, modifier = Modifier.padding(top = 8.dp))
             }
             is LoginMessageUiState.Error -> {
                 errorMessage = "Login failed. Please check your username or password."
