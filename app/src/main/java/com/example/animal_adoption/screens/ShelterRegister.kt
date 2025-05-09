@@ -92,10 +92,10 @@ fun ShelterRegister(
 
         Button(onClick = {
             errorMessage = ""
-            remoteShelterViewModel.ShelterRegister(sheltername, password) { id ->
-                Log.e("Navigating to ShelterHome with ID", "Navigating to ShelterHome with ID: $id")
-                println("Navigating to ShelterHome with ID: $id")
-                navController.navigate("ShelterHome/$id")
+            remoteShelterViewModel.ShelterRegister(sheltername, password) { shelter ->
+                Log.e("Navigating to ShelterHome with ID", "Navigating to ShelterHome with ID: $shelter.id")
+                println("Navigating to ShelterHome with ID: $shelter.id")
+                navController.navigate("ShelterHome/$shelter")
             }
             connectMessage = true
         }) {
