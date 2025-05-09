@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
 import com.example.animal_adoption.viewmodel.ShelterLoginMessageUiState
+import com.google.gson.Gson
 
 
 @Composable
@@ -93,9 +94,8 @@ fun ShelterRegister(
         Button(onClick = {
             errorMessage = ""
             remoteShelterViewModel.ShelterRegister(sheltername, password) { shelter ->
-                Log.e("Navigating to ShelterHome with ID", "Navigating to ShelterHome with ID: $shelter.id")
-                println("Navigating to ShelterHome with ID: $shelter.id")
-                navController.navigate("ShelterHome/$shelter")
+                val shelterJson = Gson().toJson(shelter)
+                navController.navigate("ShelterHome/$shelterJson")
             }
             connectMessage = true
         }) {
