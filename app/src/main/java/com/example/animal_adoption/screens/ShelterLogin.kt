@@ -127,11 +127,11 @@ fun ShelterLogin(
 
         Button(
             onClick = {
-                errorMessage = ""
-                remoteShelterViewModel.ShelterLogin(sheltername, password) { shelter ->
-                    val shelterJson = Gson().toJson(shelter)
-                    navController.navigate("ShelterHome/$shelterJson")
-            }
+              errorMessage = ""
+              remoteShelterViewModel.ShelterLogin(sheltername, password) { shelter ->
+                val shelterJson = Gson().toJson(shelter)
+                navController.navigate("ShelterHome/$shelterJson")
+              }
                 connectMessage = true
             },
             modifier = Modifier
@@ -139,11 +139,12 @@ fun ShelterLogin(
                 .height(56.dp),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF4285F4), // Azul consistente
+                containerColor = Color(0xFF4285F4),
                 contentColor = Color.White
             )
         ) {
             Text("Login", fontSize = 18.sp)
+            
         }
 
         when (shelterLoginMessageUiState) {
