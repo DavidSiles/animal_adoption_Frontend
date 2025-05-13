@@ -31,14 +31,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.animal_adoption.model.ShelterDTO
 import com.example.animal_adoption.viewmodel.CreateNewAnimalMessageUiState
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
+import com.google.gson.Gson
 
 @Composable
 fun ShelterCreateAnimal(
     navController: NavHostController,
     remoteShelterViewModel: RemoteShelterViewModel,
-    id: Int?
+    shelter: ShelterDTO?
 ) {
     val createNewAnimalMessageUiState by remoteShelterViewModel.createNewAnimalMessageUiState.collectAsState()
     var reiacText by remember { mutableStateOf("") }
@@ -67,7 +69,7 @@ fun ShelterCreateAnimal(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "ID user $id")
+        Text(text = "Welcome Shelter ${shelter?.sheltername ?: "Guest"}")
 
         Text(text = "Create New Animal", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black)
 
@@ -100,12 +102,20 @@ fun ShelterCreateAnimal(
 
         Button(onClick = {
             errorMessage = ""
-            // Conversión segura de texto a entero para usarlo
-            val reiac: Int = reiacText.toIntOrNull()!!
-            Log.e("REIAC", "Este es el valor del reiac: $reiac")
-            remoteShelterViewModel.CreateNewAnimal(reiac, name){
+            when {
+                reiacText.isEmpty() -> errorMessage = "Please enter a valid reiac"
+                name.isEmpty() -> errorMessage = "Please enter a name"
+                else -> {
+                    val reiac = reiacText.toIntOrNull()
+                    if (reiac == null) {
+                        errorMessage = "Reiac must be a valid number"
+                    } else {
+                        Log.d("REIAC", "Reiac value: $reiac")
+                        remoteShelterViewModel.CreateNewAnimal(reiac, name, shelter) {}
+                        connectMessage = true
+                    }
+                }
             }
-            connectMessage = true
         }) {
             Text(text = "Create Animal")
         }
@@ -113,7 +123,10 @@ fun ShelterCreateAnimal(
         when (createNewAnimalMessageUiState) {
             is CreateNewAnimalMessageUiState.Success -> {
                 Text(text = "Create animal successful!", color = Color.Green, fontSize = 16.sp, modifier = Modifier.padding(top = 8.dp))
-                navController.navigate("ShelterHome/$id")
+                val shelterJson = Gson().toJson(shelter)
+                navController.navigate("ShelterHome/$shelterJson") {
+                    popUpTo("ShelterCreateAnimal") { inclusive = true }
+                }
             }
             is CreateNewAnimalMessageUiState.Error -> {
                 errorMessage = "create animal failed. Please check the reiac or name."
