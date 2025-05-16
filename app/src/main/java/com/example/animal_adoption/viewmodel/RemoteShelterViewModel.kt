@@ -21,31 +21,34 @@ import retrofit2.http.Path
 
 sealed interface ShelterRemoteMessageUiState {
     data class Success(val remoteMessage: List<ShelterDTO>) : ShelterRemoteMessageUiState
-
     object Error : ShelterRemoteMessageUiState
     object Loading : ShelterRemoteMessageUiState
 }
 
 sealed interface ShelterLoginMessageUiState {
     data class Success(val loginMessage: ShelterDTO?) : ShelterLoginMessageUiState
-
     object Error : ShelterLoginMessageUiState
     object Loading : ShelterLoginMessageUiState
 }
 
 sealed interface CreateNewAnimalMessageUiState {
     data class Success(val crateNewAnimalMessage: AnimalDTO?) : CreateNewAnimalMessageUiState
-
     object Error : CreateNewAnimalMessageUiState
     object Loading : CreateNewAnimalMessageUiState
+}
+
+sealed interface GetShelterAnimalsListMessageUiState {
+    data class Success(val getShelterAnimalsListMessage: List<AnimalDTO?>?) : GetShelterAnimalsListMessageUiState
+    object Error : GetShelterAnimalsListMessageUiState
+    object Loading : GetShelterAnimalsListMessageUiState
 }
 
 interface RemoteShelterInterface {
     @GET("shelters/index")
     suspend fun getRemoteShelter(): List<ShelterDTO>
 
-    @GET("shelters/{username}")
-    suspend fun getShelterBySheltername(@Path("username") username: String): ShelterDTO
+    @GET("animal/shelterList/{shelterId}")
+    suspend fun getShelterListAnimals(@Path("shelterId") shelterId: Integer): List<AnimalDTO>?
 
     @POST("shelters/login")
     suspend fun ShelterLogin(@Body loginRequest: ShelterLoginRequest): ShelterDTO
@@ -53,41 +56,43 @@ interface RemoteShelterInterface {
     @POST("shelters/create")
     suspend fun ShelterRegister(@Body registerRequest: ShelterRegisterRequest): ShelterDTO
 
-    @POST("animal/new")
+    @POST("/new")
     suspend fun ShelterCreateNewAnimal(@Body createNewAnimalRequest: CreateNewAnimalRequest): AnimalDTO
 }
 
 class RemoteShelterViewModel : ViewModel() {
 
-    private val _remoteMessageUiState = MutableStateFlow<ShelterRemoteMessageUiState>(
-        ShelterRemoteMessageUiState.Loading)
-    var remoteMessageUiState: StateFlow<ShelterRemoteMessageUiState> = _remoteMessageUiState
+    private val _remoteMessageUiState = MutableStateFlow<ShelterRemoteMessageUiState>(ShelterRemoteMessageUiState.Loading)
+    val remoteMessageUiState: StateFlow<ShelterRemoteMessageUiState> = _remoteMessageUiState.asStateFlow()
 
-    private val _loginMessageUiState = MutableStateFlow<ShelterLoginMessageUiState>(
-        ShelterLoginMessageUiState.Loading)
-    var loginMessageUiState: StateFlow<ShelterLoginMessageUiState> = _loginMessageUiState
+    private val _loginMessageUiState = MutableStateFlow<ShelterLoginMessageUiState>(ShelterLoginMessageUiState.Loading)
+    val loginMessageUiState: StateFlow<ShelterLoginMessageUiState> = _loginMessageUiState.asStateFlow()
 
-    private val _createNewAnimalMessageUiState = MutableStateFlow<CreateNewAnimalMessageUiState>(
-        CreateNewAnimalMessageUiState.Loading)
-    var createNewAnimalMessageUiState: StateFlow<CreateNewAnimalMessageUiState> = _createNewAnimalMessageUiState
+    private val _createNewAnimalMessageUiState = MutableStateFlow<CreateNewAnimalMessageUiState>(CreateNewAnimalMessageUiState.Loading)
+    val createNewAnimalMessageUiState: StateFlow<CreateNewAnimalMessageUiState> = _createNewAnimalMessageUiState.asStateFlow()
 
-    //ip del emulador 10.0.0.2.
-    //ip del movil DavidSiles 10.0.22.100
+    private val _getShelterAnimalsListMessage = MutableStateFlow<GetShelterAnimalsListMessageUiState>(GetShelterAnimalsListMessageUiState.Loading)
+    val getShelterAnimalsListMessage: StateFlow<GetShelterAnimalsListMessageUiState> = _getShelterAnimalsListMessage.asStateFlow()
+
+    private val _shelter = MutableStateFlow<ShelterDTO?>(null)
+    val shelter: StateFlow<ShelterDTO?> = _shelter.asStateFlow()
+
+    private val _shelterId = MutableStateFlow<Integer?>(null)
+    val shelterId: StateFlow<Integer?> = _shelterId.asStateFlow()
+
+    private val _animal = MutableStateFlow<AnimalDTO?>(null)
+    val animal: StateFlow<AnimalDTO?> = _animal.asStateFlow()
+
+    private val _animalList = MutableStateFlow<List<AnimalDTO>>(emptyList())
+    val animalList: StateFlow<List<AnimalDTO>> = _animalList.asStateFlow()
+
     val connection = Retrofit.Builder()
         .baseUrl("http://10.0.22.100:8080/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-
     private val remoteService = connection.create(RemoteShelterInterface::class.java)
 
-    private val _shelter = MutableStateFlow<ShelterDTO?>(null)
-    val shelter: StateFlow<ShelterDTO?> = _shelter.asStateFlow()
-
-    private val _animal = MutableStateFlow<AnimalDTO?>(null)
-    val animal: StateFlow<AnimalDTO?> = _animal
-
-    // Get all sheter
     fun getRemoteShelter() {
         viewModelScope.launch {
             _remoteMessageUiState.value = ShelterRemoteMessageUiState.Loading
@@ -103,14 +108,14 @@ class RemoteShelterViewModel : ViewModel() {
         }
     }
 
-    // Login
-    fun ShelterLogin(sheltername: String, password: String, onSuccess: (ShelterDTO) -> Unit) {
+    fun ShelterLogin(sheltername: String, password: String, onSuccess: (ShelterDTO?) -> Unit) {
         viewModelScope.launch {
             _loginMessageUiState.value = ShelterLoginMessageUiState.Loading
             try {
                 val loginRequest = ShelterLoginRequest(sheltername = sheltername, password = password)
                 val shelter = remoteService.ShelterLogin(loginRequest)
                 _shelter.value = shelter
+                Log.d("ShelterLogin", "Shelter after login: ${_shelter.value}")
                 _loginMessageUiState.value = ShelterLoginMessageUiState.Success(shelter)
                 onSuccess(shelter)
             } catch (e: Exception) {
@@ -120,7 +125,6 @@ class RemoteShelterViewModel : ViewModel() {
         }
     }
 
-    // Registro
     fun ShelterRegister(sheltername: String, password: String, onSuccess: (ShelterDTO?) -> Unit) {
         viewModelScope.launch {
             _loginMessageUiState.value = ShelterLoginMessageUiState.Loading
@@ -128,8 +132,9 @@ class RemoteShelterViewModel : ViewModel() {
                 val registerRequest = ShelterRegisterRequest(sheltername = sheltername, password = password)
                 val shelter = remoteService.ShelterRegister(registerRequest)
                 _shelter.value = shelter
-                _loginMessageUiState.value = ShelterLoginMessageUiState.Success(_shelter.value)
-                onSuccess(_shelter.value)
+                Log.d("ShelterLogin", "Shelter after login: ${_shelter.value}")
+                _loginMessageUiState.value = ShelterLoginMessageUiState.Success(shelter)
+                onSuccess(shelter)
             } catch (e: Exception) {
                 Log.e("Register", "Error during registration: ${e.message}", e)
                 _loginMessageUiState.value = ShelterLoginMessageUiState.Error
@@ -137,25 +142,30 @@ class RemoteShelterViewModel : ViewModel() {
         }
     }
 
-    // Función para obtener los detalles del enfermero por ID
-    fun getShelterBySheltername(sheltername: String, onSuccess: (ShelterDTO) -> Unit, onFailure: () -> Unit) {
+    fun getShelterAnimals(shelterId: Integer, onSuccess: (List<AnimalDTO>?) -> Unit, onFailure: () -> Unit) {
         viewModelScope.launch {
+            _getShelterAnimalsListMessage.value = GetShelterAnimalsListMessageUiState.Loading
             try {
-                val shelter = remoteService.getShelterBySheltername(sheltername)  // Realizamos la petición GET
-                onSuccess(shelter)  // Pasamos el objeto Nurse a la UI
+                Log.d("GetShelterAnimals", "Fetching animals for shelterId: $shelterId")
+                val animalList = remoteService.getShelterListAnimals(shelterId) ?: emptyList()
+                Log.d("GetShelterAnimals", "Fetched ${animalList.size} animals: ${animalList[0].reiac}")
+                _animalList.value = animalList
+                _getShelterAnimalsListMessage.value = GetShelterAnimalsListMessageUiState.Success(animalList)
+                onSuccess(animalList)
             } catch (e: Exception) {
-                Log.e("GetShelterById", "Error fetching nurse: ${e.message}", e)
-                onFailure()  // Llamamos al callback de error si ocurre un fallo
+                Log.e("GetShelterAnimals", "Error fetching animals: ${e.message}", e)
+                _getShelterAnimalsListMessage.value = GetShelterAnimalsListMessageUiState.Error
+                onFailure()
             }
         }
     }
 
-    // Create new animal with shelter
-    fun CreateNewAnimal(reiac: Int, name: String, shelter: ShelterDTO?, onSuccess: (AnimalDTO?) -> Unit) {
+    fun CreateNewAnimal(reiac: Int, name: String, shelterId: Integer?, onSuccess: (AnimalDTO?) -> Unit) {
         viewModelScope.launch {
             _createNewAnimalMessageUiState.value = CreateNewAnimalMessageUiState.Loading
             try {
-                val registerRequest = CreateNewAnimalRequest(reiac = reiac, name = name, shelter = shelter)
+                Log.d("Create animal", "$reiac / $name / $shelterId")
+                val registerRequest = CreateNewAnimalRequest(reiac = reiac, name = name, shelterId = shelterId)
                 val animal = remoteService.ShelterCreateNewAnimal(registerRequest)
                 Log.d("Create animal", "Animal created successfully: $animal")
                 _createNewAnimalMessageUiState.value = CreateNewAnimalMessageUiState.Success(animal)
@@ -166,5 +176,4 @@ class RemoteShelterViewModel : ViewModel() {
             }
         }
     }
-
 }

@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -16,12 +17,14 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.animal_adoption.model.ShelterDTO
 import com.example.animal_adoption.screens.widgets.ShelterBottomBar
+import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
 
 @Composable
 fun ShelterProfile(
     navController: NavHostController,
     shelter: ShelterDTO?
 ) {
+
     Scaffold(
         bottomBar = { ShelterBottomBar(navController, shelter) },
         content = { paddingValues ->
@@ -32,7 +35,6 @@ fun ShelterProfile(
                     .background(MaterialTheme.colorScheme.background),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Header Section
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -40,7 +42,6 @@ fun ShelterProfile(
                         .background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center
                 ) {
-                    // Placeholder for shelter logo/avatar
                     Box(
                         modifier = Modifier
                             .size(100.dp)
@@ -57,7 +58,6 @@ fun ShelterProfile(
                     }
                 }
 
-                // Shelter Information
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = shelter?.sheltername ?: "Shelter Name",
@@ -74,7 +74,6 @@ fun ShelterProfile(
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                 )
 
-                // Additional Info Placeholder
                 Spacer(modifier = Modifier.height(24.dp))
                 Card(
                     modifier = Modifier

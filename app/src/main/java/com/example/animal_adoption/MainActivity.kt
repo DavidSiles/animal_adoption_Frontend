@@ -16,6 +16,7 @@ import com.example.animal_adoption.screens.ShelterCreateAnimal
 import com.example.animal_adoption.screens.ShelterLogin
 import com.example.animal_adoption.screens.ShelterRegister
 import com.example.animal_adoption.screens.ShelterHome
+import com.example.animal_adoption.screens.ShelterListAnimals
 import com.example.animal_adoption.screens.UserLogin
 import com.example.animal_adoption.screens.UserHome
 import com.example.animal_adoption.screens.UserRegister
@@ -66,6 +67,10 @@ class MainActivity : ComponentActivity() {
                     composable("ShelterCreateAnimal/{shelter}") { backStackEntry ->
                         val shelter = deserializeShelter(backStackEntry)
                         ShelterCreateAnimal(navController = navController, remoteShelterViewModel = viewModel(), shelter = shelter)
+                    }
+                    composable ("ShelterListAnimals/{shelter}"){ backStackEntry ->
+                        val shelter = deserializeShelter(backStackEntry)
+                        ShelterListAnimals(navController = navController, remoteShelterViewModel = viewModel(), shelter = shelter)
                     }
                 }
             }

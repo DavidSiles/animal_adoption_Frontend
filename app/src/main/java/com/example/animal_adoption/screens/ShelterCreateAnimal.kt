@@ -43,6 +43,7 @@ fun ShelterCreateAnimal(
     shelter: ShelterDTO?
 ) {
     val createNewAnimalMessageUiState by remoteShelterViewModel.createNewAnimalMessageUiState.collectAsState()
+    val shelterId = shelter?.id
     var reiacText by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -78,7 +79,6 @@ fun ShelterCreateAnimal(
         OutlinedTextField(
             value = reiacText,
             onValueChange = { newValue ->
-                // Permitir solo números
                 if (newValue.all { it.isDigit() }) {
                     reiacText = newValue
                 }
@@ -111,7 +111,11 @@ fun ShelterCreateAnimal(
                         errorMessage = "Reiac must be a valid number"
                     } else {
                         Log.d("REIAC", "Reiac value: $reiac")
-                        remoteShelterViewModel.CreateNewAnimal(reiac, name, shelter) {}
+                        remoteShelterViewModel.CreateNewAnimal(reiac, name, shelterId) {
+                            navController.navigate("ShelterHome") {
+                                popUpTo("ShelterCreateAnimal") { inclusive = true }
+                            }
+                        }
                         connectMessage = true
                     }
                 }
@@ -123,13 +127,9 @@ fun ShelterCreateAnimal(
         when (createNewAnimalMessageUiState) {
             is CreateNewAnimalMessageUiState.Success -> {
                 Text(text = "Create animal successful!", color = Color.Green, fontSize = 16.sp, modifier = Modifier.padding(top = 8.dp))
-                val shelterJson = Gson().toJson(shelter)
-                navController.navigate("ShelterHome/$shelterJson") {
-                    popUpTo("ShelterCreateAnimal") { inclusive = true }
-                }
             }
             is CreateNewAnimalMessageUiState.Error -> {
-                errorMessage = "create animal failed. Please check the reiac or name."
+                errorMessage = "Create animal failed. Please check the reiac or name."
             }
             is CreateNewAnimalMessageUiState.Loading -> {
                 if (connectMessage) {

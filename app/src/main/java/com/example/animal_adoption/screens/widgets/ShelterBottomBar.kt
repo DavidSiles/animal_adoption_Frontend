@@ -1,52 +1,98 @@
 package com.example.animal_adoption.screens.widgets
 
+import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.animal_adoption.model.ShelterDTO
+import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
 import com.google.gson.Gson
 
 
 @Composable
-fun ShelterBottomBar(navController: NavHostController, shelter: ShelterDTO?) {
+fun ShelterBottomBar(
+    navController: NavHostController,
+    shelter: ShelterDTO?
+) {
     val shelterJson = Gson().toJson(shelter)
-    NavigationBar(
-        containerColor = MaterialTheme.colorScheme.surface,
-        contentColor = MaterialTheme.colorScheme.onSurface
-    ) {
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-            label = { Text("Home") },
-            selected = false,
-            onClick = { navController.navigate("ShelterHome/$shelterJson") }
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Info, contentDescription = "Animals") },
-            label = { Text("Animals") },
-            selected = false,
-            onClick = { /* Navigate to Animals */ }
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Email, contentDescription = "Chats") },
-            label = { Text("Chats") },
-            selected = false,
-            onClick = { /* Navigate to Events */ }
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Profile") },
-            label = { Text("Profile") },
-            selected = false,
-            onClick = {
-                navController.navigate("ShelterProfile/$shelterJson")}
-        )
+
+    BottomAppBar {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(12.dp)
+                    .width(80.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ){
+                IconButton(onClick = { navController.navigate("ShelterHome/$shelterJson") }) {
+                    Icon(Icons.Default.Home, contentDescription = "Home")
+                }
+                Text(
+                    text = "Home",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .padding(12.dp)
+                    .width(80.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                IconButton(onClick = { navController.navigate("ShelterListAnimals/$shelterJson") }) {
+                    Icon(Icons.Default.Menu, contentDescription = "Animals")
+                }
+                Text(
+                    text = "Animals",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .padding(12.dp)
+                    .width(80.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                IconButton(onClick = { navController.navigate("ShelterProfile/$shelterJson") }) {
+                    Icon(Icons.Default.Person, contentDescription = "Profile")
+                }
+                Text(
+                    text = "Profile",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+        }
     }
 }

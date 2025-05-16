@@ -70,8 +70,7 @@ fun ShelterLogin(
                 }
                 launchSingleTop = true
             }
-        })
-        {
+        }) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "Back to home"
@@ -127,11 +126,11 @@ fun ShelterLogin(
 
         Button(
             onClick = {
-              errorMessage = ""
-              remoteShelterViewModel.ShelterLogin(sheltername, password) { shelter ->
-                val shelterJson = Gson().toJson(shelter)
-                navController.navigate("ShelterHome/$shelterJson")
-              }
+                errorMessage = ""
+                remoteShelterViewModel.ShelterLogin(sheltername, password) { shelter ->
+                    val shelterJson = Gson().toJson(shelter)
+                    navController.navigate("ShelterHome/$shelterJson")
+                }
                 connectMessage = true
             },
             modifier = Modifier
@@ -144,7 +143,6 @@ fun ShelterLogin(
             )
         ) {
             Text("Login", fontSize = 18.sp)
-            
         }
 
         when (shelterLoginMessageUiState) {
@@ -159,11 +157,9 @@ fun ShelterLogin(
                         .wrapContentWidth(Alignment.CenterHorizontally)
                 )
             }
-
             is ShelterLoginMessageUiState.Error -> {
                 errorMessage = "Login failed. Please check your username or password."
             }
-
             is ShelterLoginMessageUiState.Loading -> {
                 if (connectMessage) {
                     CircularProgressIndicator(

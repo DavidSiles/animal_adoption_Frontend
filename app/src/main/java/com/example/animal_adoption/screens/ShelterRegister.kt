@@ -69,8 +69,7 @@ fun ShelterRegister(
                 }
                 launchSingleTop = true
             }
-        })
-        {
+        }) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "Back to home"
@@ -128,8 +127,8 @@ fun ShelterRegister(
             onClick = {
                 errorMessage = ""
                 remoteShelterViewModel.ShelterRegister(sheltername, password) { shelter ->
-                  val shelterJson = Gson().toJson(shelter)
-                  navController.navigate("ShelterHome/$shelterJson")
+                    val shelterJson = Gson().toJson(shelter)
+                    navController.navigate("ShelterHome/$shelterJson")
                 }
                 connectMessage = true
             },
@@ -149,7 +148,7 @@ fun ShelterRegister(
             is ShelterLoginMessageUiState.Success -> {
                 Text(
                     text = "Registration successful!",
-                    color = Color(0xFF2ECC71), // Verde
+                    color = Color(0xFF2ECC71),
                     fontSize = 16.sp,
                     modifier = Modifier
                         .padding(top = 16.dp)
@@ -164,7 +163,7 @@ fun ShelterRegister(
                 if (connectMessage) {
                     Text(
                         text = "Connecting...",
-                        color = Color(0xFF3498DB), // Azul claro
+                        color = Color(0xFF3498DB),
                         fontSize = 16.sp,
                         modifier = Modifier
                             .padding(top = 16.dp)
