@@ -13,15 +13,15 @@ import androidx.navigation.compose.rememberNavController
 import com.example.animal_adoption.model.ShelterDTO
 import com.example.animal_adoption.screens.FirsScreen
 import com.example.animal_adoption.screens.ShelterCreateAnimal
-import com.example.animal_adoption.screens.ShelterLogin
-import com.example.animal_adoption.screens.ShelterRegister
 import com.example.animal_adoption.screens.ShelterHome
 import com.example.animal_adoption.screens.ShelterListAnimals
-import com.example.animal_adoption.screens.UserLogin
+import com.example.animal_adoption.screens.ShelterLogin
+import com.example.animal_adoption.screens.ShelterRegister
 import com.example.animal_adoption.screens.UserHome
-import com.example.animal_adoption.screens.UserRegister
+import com.example.animal_adoption.screens.UserLogin
 import com.example.animal_adoption.screens.UserProfile
-import com.example.shelterapp.ui.ShelterProfile
+import com.example.animal_adoption.screens.UserRegister
+import com.example.animal_adoption.screens.ShelterProfile
 import com.google.gson.Gson
 
 class MainActivity : ComponentActivity() {
@@ -46,7 +46,7 @@ class MainActivity : ComponentActivity() {
                         val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
                         UserProfile(navController = navController, id = id)
                     }
-                    composable("UserRegister") { backStackEntry ->
+                    composable("UserRegister") {
                         UserRegister(navController = navController, remoteUserViewModel = viewModel())
                     }
 
@@ -61,14 +61,14 @@ class MainActivity : ComponentActivity() {
                         val shelter = deserializeShelter(backStackEntry)
                         ShelterProfile(navController = navController, shelter = shelter)
                     }
-                    composable("ShelterRegister") { backStackEntry ->
+                    composable("ShelterRegister") {
                         ShelterRegister(navController = navController, remoteShelterViewModel = viewModel())
                     }
                     composable("ShelterCreateAnimal/{shelter}") { backStackEntry ->
                         val shelter = deserializeShelter(backStackEntry)
                         ShelterCreateAnimal(navController = navController, remoteShelterViewModel = viewModel(), shelter = shelter)
                     }
-                    composable ("ShelterListAnimals/{shelter}"){ backStackEntry ->
+                    composable("ShelterListAnimals/{shelter}") { backStackEntry ->
                         val shelter = deserializeShelter(backStackEntry)
                         ShelterListAnimals(navController = navController, remoteShelterViewModel = viewModel(), shelter = shelter)
                     }
@@ -87,4 +87,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-

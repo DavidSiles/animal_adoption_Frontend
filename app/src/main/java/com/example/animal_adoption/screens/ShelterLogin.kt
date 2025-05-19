@@ -1,5 +1,6 @@
 package com.example.animal_adoption.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -127,11 +127,17 @@ fun ShelterLogin(
         Button(
             onClick = {
                 errorMessage = ""
-                remoteShelterViewModel.ShelterLogin(sheltername, password) { shelter ->
-                    val shelterJson = Gson().toJson(shelter)
-                    navController.navigate("ShelterHome/$shelterJson")
+                when {
+                    sheltername.isEmpty() -> errorMessage = "Please enter a shelter name"
+                    password.isEmpty() -> errorMessage = "Please enter a password"
+                    else -> {
+                        remoteShelterViewModel.shelterLogin(sheltername, password) { shelter ->
+                            val shelterJson = Gson().toJson(shelter)
+                            navController.navigate("ShelterHome/$shelterJson")
+                        }
+                        connectMessage = true
+                    }
                 }
-                connectMessage = true
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -158,7 +164,7 @@ fun ShelterLogin(
                 )
             }
             is ShelterLoginMessageUiState.Error -> {
-                errorMessage = "Login failed. Please check your username or password."
+                errorMessage = (shelterLoginMessageUiState as ShelterLoginMessageUiState.Error).message
             }
             is ShelterLoginMessageUiState.Loading -> {
                 if (connectMessage) {

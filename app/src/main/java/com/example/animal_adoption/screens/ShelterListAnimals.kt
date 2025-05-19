@@ -43,11 +43,11 @@ fun ShelterListAnimals(
         Log.d("ShelterListAnimals", "Fetching animals for shelter ID: ${shelter.id}")
         remoteShelterViewModel.getShelterAnimals(
             shelterId = shelter.id,
-            onSuccess = {
-                Log.d("ShelterListAnimals", "Success: Fetched animals")
+            onSuccess = { animals ->
+                Log.d("ShelterListAnimals", "Success: Fetched ${animals?.size ?: 0} animals")
             },
-            onFailure = {
-                Log.e("ShelterListAnimals", "Failure: Error fetching animals")
+            onFailure = { errorMessage ->
+                Log.e("ShelterListAnimals", "Failure: $errorMessage")
             }
         )
     }
@@ -68,7 +68,7 @@ fun ShelterListAnimals(
             }
             is GetShelterAnimalsListMessageUiState.Success -> {
                 val animals = (uiState as GetShelterAnimalsListMessageUiState.Success).getShelterAnimalsListMessage
-                Log.d("ShelterListAnimals", "Animals received: $animals")
+                Log.d("ShelterListAnimals", "Animals received: ${animals?.size ?: 0}")
                 if (animals.isNullOrEmpty()) {
                     Box(
                         modifier = Modifier
@@ -82,7 +82,7 @@ fun ShelterListAnimals(
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(padding)
+                            .padding(20.dp)
                             .padding(horizontal = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
@@ -93,7 +93,7 @@ fun ShelterListAnimals(
                 }
             }
             is GetShelterAnimalsListMessageUiState.Error -> {
-                Log.e("ShelterListAnimals", "Error state reached")
+                Log.e("ShelterListAnimals", "Error: ${(uiState as GetShelterAnimalsListMessageUiState.Error).message}")
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -104,7 +104,7 @@ fun ShelterListAnimals(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Failed to load animals",
+                            text = (uiState as GetShelterAnimalsListMessageUiState.Error).message,
                             color = MaterialTheme.colorScheme.error
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -126,7 +126,7 @@ fun ShelterListAnimals(
 
 @Composable
 fun AnimalCard(animal: AnimalDTO) {
-    Log.d("AnimalCard", "name: ${animal.name}, reiac: ${animal.reiac}, Sid: ${animal.shelter?.id}")
+    Log.d("AnimalCard", "name: ${animal.name}, reiac: ${animal.reiac}, shelterId: ${animal.shelterId}")
     Card(
         modifier = Modifier.fillMaxWidth().padding(10.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -141,6 +141,8 @@ fun AnimalCard(animal: AnimalDTO) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = "REIAC: ${animal.reiac}")
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = "Shelter ID: ${animal.shelterId ?: "N/A"}")
         }
     }
 }

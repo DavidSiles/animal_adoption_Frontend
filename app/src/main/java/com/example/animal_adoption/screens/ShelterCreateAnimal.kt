@@ -34,7 +34,6 @@ import androidx.navigation.NavHostController
 import com.example.animal_adoption.model.ShelterDTO
 import com.example.animal_adoption.viewmodel.CreateNewAnimalMessageUiState
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
-import com.google.gson.Gson
 
 @Composable
 fun ShelterCreateAnimal(
@@ -94,7 +93,7 @@ fun ShelterCreateAnimal(
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
-            label = { Text(text = "Name") },
+            label = { Text("Name") },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -103,18 +102,21 @@ fun ShelterCreateAnimal(
         Button(onClick = {
             errorMessage = ""
             when {
+                shelterId == null -> errorMessage = "Shelter ID is missing"
                 reiacText.isEmpty() -> errorMessage = "Please enter a valid reiac"
-                name.isEmpty() -> errorMessage = "Please enter a name"
+                name.isEmpty() || name.length > 50 -> errorMessage = "Name must be between 1 and 50 characters"
                 else -> {
                     val reiac = reiacText.toIntOrNull()
-                    if (reiac == null) {
-                        errorMessage = "Reiac must be a valid number"
+                    if (reiac == null || reiac <= 0) {
+                        errorMessage = "Reiac must be a positive number"
                     } else {
-                        Log.d("REIAC", "Reiac value: $reiac")
-                        remoteShelterViewModel.CreateNewAnimal(reiac, name, shelterId) {
-                            navController.navigate("ShelterHome") {
-                                popUpTo("ShelterCreateAnimal") { inclusive = true }
-                            }
+                        Log.d("CreateAnimal", "Attempting to create animal: reiac=$reiac, name=$name, shelterId=$shelterId")
+                        remoteShelterViewModel.createNewAnimal(reiac, name, shelterId) {
+                            // Clear form instead of navigating
+                            reiacText = ""
+                            name = ""
+                            errorMessage = "Animal created successfully!"
+                            connectMessage = false
                         }
                         connectMessage = true
                     }
@@ -126,20 +128,35 @@ fun ShelterCreateAnimal(
 
         when (createNewAnimalMessageUiState) {
             is CreateNewAnimalMessageUiState.Success -> {
-                Text(text = "Create animal successful!", color = Color.Green, fontSize = 16.sp, modifier = Modifier.padding(top = 8.dp))
+                Text(
+                    text = "Animal created successfully!",
+                    color = Color.Green,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
             }
             is CreateNewAnimalMessageUiState.Error -> {
-                errorMessage = "Create animal failed. Please check the reiac or name."
+                errorMessage = (createNewAnimalMessageUiState as CreateNewAnimalMessageUiState.Error).message
             }
             is CreateNewAnimalMessageUiState.Loading -> {
                 if (connectMessage) {
-                    Text(text = "Connecting...", color = Color.Blue, fontSize = 16.sp, modifier = Modifier.padding(top = 8.dp))
+                    Text(
+                        text = "Connecting...",
+                        color = Color.Blue,
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
                 }
             }
         }
 
         if (errorMessage.isNotEmpty()) {
-            Text(text = errorMessage, color = Color.Red, fontSize = 14.sp, modifier = Modifier.padding(top = 8.dp))
+            Text(
+                text = errorMessage,
+                color = if (errorMessage == "Animal created successfully!") Color.Green else Color.Red,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(top = 8.dp)
+            )
         }
     }
 }

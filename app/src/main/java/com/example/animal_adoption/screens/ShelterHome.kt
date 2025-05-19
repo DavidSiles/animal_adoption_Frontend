@@ -1,6 +1,7 @@
 package com.example.animal_adoption.screens
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,6 +30,9 @@ fun ShelterHome(
     navController: NavHostController,
     shelter: ShelterDTO?
 ) {
+    // Deshabilitar el botón de retroceso del dispositivo
+    BackHandler(enabled = true) {
+    }
     val shelterJson = Gson().toJson(shelter)
     Scaffold(
         bottomBar = { ShelterBottomBar(navController, shelter) },
