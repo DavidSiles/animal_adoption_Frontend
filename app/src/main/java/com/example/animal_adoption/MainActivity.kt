@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.animal_adoption.model.ShelterDTO
 import com.example.animal_adoption.screens.FirsScreen
+import com.example.animal_adoption.screens.ShelterConfiguration
 import com.example.animal_adoption.screens.ShelterCreateAnimal
 import com.example.animal_adoption.screens.ShelterHome
 import com.example.animal_adoption.screens.ShelterListAnimals
@@ -71,6 +72,10 @@ class MainActivity : ComponentActivity() {
                     composable("ShelterListAnimals/{shelter}") { backStackEntry ->
                         val shelter = deserializeShelter(backStackEntry)
                         ShelterListAnimals(navController = navController, remoteShelterViewModel = viewModel(), shelter = shelter)
+                    }
+                    composable("ShelterConfiguration/{shelter}") { backStackEntry ->
+                        val shelter = deserializeShelter(backStackEntry)
+                        ShelterConfiguration(navController = navController, remoteShelterViewModel = viewModel(), shelter = shelter)
                     }
                 }
             }

@@ -15,6 +15,7 @@ import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -50,6 +51,12 @@ sealed interface GetShelterAnimalsListMessageUiState {
     object Loading : GetShelterAnimalsListMessageUiState
 }
 
+sealed interface DeleteShelterMessageUiState {
+    data class Success(val message: String) : DeleteShelterMessageUiState
+    data class Error(val message: String) : DeleteShelterMessageUiState
+    object Loading : DeleteShelterMessageUiState
+}
+
 interface RemoteShelterInterface {
     @GET("shelters/index")
     suspend fun getRemoteShelter(): List<ShelterDTO>
@@ -65,6 +72,9 @@ interface RemoteShelterInterface {
 
     @POST("animal/new")
     suspend fun shelterCreateNewAnimal(@Body animalDTO: AnimalDTO): AnimalDTO
+
+    @DELETE("shelters/{shelterId}")
+    suspend fun deleteShelter(@Path("shelterId") shelterId: Integer): Void
 }
 
 class RemoteShelterViewModel : ViewModel() {
@@ -84,6 +94,9 @@ class RemoteShelterViewModel : ViewModel() {
     private val _getShelterAnimalsListMessage = MutableStateFlow<GetShelterAnimalsListMessageUiState>(GetShelterAnimalsListMessageUiState.Loading)
     val getShelterAnimalsListMessage: StateFlow<GetShelterAnimalsListMessageUiState> = _getShelterAnimalsListMessage.asStateFlow()
 
+    private val _deleteShelterMessageUiState = MutableStateFlow<DeleteShelterMessageUiState>(DeleteShelterMessageUiState.Loading)
+    val deleteShelterMessageUiState: StateFlow<DeleteShelterMessageUiState> = _deleteShelterMessageUiState.asStateFlow()
+
     private val _shelter = MutableStateFlow<ShelterDTO?>(null)
     val shelter: StateFlow<ShelterDTO?> = _shelter.asStateFlow()
 
@@ -96,8 +109,11 @@ class RemoteShelterViewModel : ViewModel() {
     private val _animalList = MutableStateFlow<List<AnimalDTO>>(emptyList())
     val animalList: StateFlow<List<AnimalDTO>> = _animalList.asStateFlow()
 
+    //ip del emulador 10.0.2.2
+    //ip del movil DavidSiles 10.0.22.100
+    //ip del movil FioMoncayo 10.118.3.231
     val connection = Retrofit.Builder()
-        .baseUrl("http://10.0.22.100:8080/")
+        .baseUrl("http://10.0.2.2:8080/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -233,6 +249,36 @@ class RemoteShelterViewModel : ViewModel() {
             } catch (e: Exception) {
                 Log.e("CreateAnimal", "Error during animal creation: ${e.message}", e)
                 _createNewAnimalMessageUiState.value = CreateNewAnimalMessageUiState.Error("Failed to create animal: ${e.message}")
+            }
+        }
+    }
+
+    fun deleteShelter(shelterId: Integer, onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
+        viewModelScope.launch {
+            _deleteShelterMessageUiState.value = DeleteShelterMessageUiState.Loading
+            try {
+                Log.d("DeleteShelter", "Deleting shelter with ID: $shelterId")
+                remoteService.deleteShelter(shelterId)
+                val successMessage = "Shelter deleted successfully"
+                Log.d("DeleteShelter", "Shelter deleted: $successMessage")
+                _shelter.value = null
+                _shelterId.value = null
+                _deleteShelterMessageUiState.value = DeleteShelterMessageUiState.Success(successMessage)
+                onSuccess(successMessage)
+            } catch (e: HttpException) {
+                Log.e("DeleteShelter", "HTTP error during deletion: ${e.message}", e)
+                val errorMessage = when (e.code()) {
+                    400 -> "Invalid shelter ID"
+                    404 -> "Shelter not found"
+                    else -> "Failed to delete shelter: ${e.message}"
+                }
+                _deleteShelterMessageUiState.value = DeleteShelterMessageUiState.Error(errorMessage)
+                onFailure(errorMessage)
+            } catch (e: Exception) {
+                Log.e("DeleteShelter", "Error during deletion: ${e.message}", e)
+                val errorMessage = "Failed to delete shelter: ${e.message}"
+                _deleteShelterMessageUiState.value = DeleteShelterMessageUiState.Error(errorMessage)
+                onFailure(errorMessage)
             }
         }
     }
