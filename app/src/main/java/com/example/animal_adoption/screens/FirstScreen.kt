@@ -23,7 +23,7 @@ import com.example.animal_adoption.R
 val Poppins = FontFamily.Default
 
 @Composable
-fun FirsScreen(navController: NavHostController) {
+fun FirstScreen(navController: NavHostController) {
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(R.drawable.fondo2),
@@ -48,12 +48,12 @@ fun FirsScreen(navController: NavHostController) {
                     contentDescription = "App Logo",
                     modifier = Modifier
                         .size(350.dp)
-                        .offset(y = (-150).dp)
+                        .offset(y = (-140).dp)
                         .padding(bottom = 40.dp),
                     contentScale = ContentScale.Fit
                 )
 
-                Spacer(Modifier.height(150.dp))
+                Spacer(Modifier.height(100.dp))
 
                 CustomButton(
                     onClick = { navController.navigate("UserRegister") },
@@ -109,6 +109,6 @@ fun CustomButton(
 @Composable
 fun FirstScreenPreview() {
     MaterialTheme {
-        FirsScreen(navController = rememberNavController())
+        FirstScreen(navController = rememberNavController())
     }
 }

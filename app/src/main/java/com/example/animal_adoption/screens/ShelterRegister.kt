@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -41,16 +42,16 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.animal_adoption.R
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
-import com.example.animal_adoption.viewmodel.ShelterLoginMessageUiState
+import com.example.animal_adoption.viewmodel.ShelterRegisterMessageUiState
 import com.google.gson.Gson
-
+import java.net.URLEncoder
 
 @Composable
 fun ShelterRegister(
     navController: NavHostController,
     remoteShelterViewModel: RemoteShelterViewModel
 ) {
-    val loginMessageUiState by remoteShelterViewModel.loginMessageUiState.collectAsState()
+    val registerMessageUiState by remoteShelterViewModel.registerMessageUiState.collectAsState()
     var sheltername by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -69,8 +70,7 @@ fun ShelterRegister(
                 }
                 launchSingleTop = true
             }
-        })
-        {
+        }) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "Back to home"
@@ -127,11 +127,17 @@ fun ShelterRegister(
         Button(
             onClick = {
                 errorMessage = ""
-                remoteShelterViewModel.ShelterRegister(sheltername, password) { shelter ->
-                  val shelterJson = Gson().toJson(shelter)
-                  navController.navigate("ShelterHome/$shelterJson")
+                when {
+                    sheltername.isEmpty() -> errorMessage = "Please enter a shelter name"
+                    password.isEmpty() -> errorMessage = "Please enter a password"
+                    else -> {
+                        remoteShelterViewModel.shelterRegister(sheltername, password) { shelter ->
+                            val shelterJson = Gson().toJson(shelter)
+                            navController.navigate("ShelterHome/$shelterJson")
+                        }
+                        connectMessage = true
+                    }
                 }
-                connectMessage = true
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -145,11 +151,11 @@ fun ShelterRegister(
             Text("Register", fontSize = 18.sp)
         }
 
-        when (loginMessageUiState) {
-            is ShelterLoginMessageUiState.Success -> {
+        when (registerMessageUiState) {
+            is ShelterRegisterMessageUiState.Success -> {
                 Text(
                     text = "Registration successful!",
-                    color = Color(0xFF2ECC71), // Verde
+                    color = Color(0xFF2ECC71),
                     fontSize = 16.sp,
                     modifier = Modifier
                         .padding(top = 16.dp)
@@ -157,19 +163,14 @@ fun ShelterRegister(
                         .wrapContentWidth(Alignment.CenterHorizontally)
                 )
             }
-            is ShelterLoginMessageUiState.Error -> {
-                errorMessage = "Register failed. Please check your username or password."
+            is ShelterRegisterMessageUiState.Error -> {
+                errorMessage = (registerMessageUiState as ShelterRegisterMessageUiState.Error).message
             }
-            is ShelterLoginMessageUiState.Loading -> {
+            is ShelterRegisterMessageUiState.Loading -> {
                 if (connectMessage) {
-                    Text(
-                        text = "Connecting...",
-                        color = Color(0xFF3498DB), // Azul claro
-                        fontSize = 16.sp,
-                        modifier = Modifier
-                            .padding(top = 16.dp)
-                            .fillMaxWidth()
-                            .wrapContentWidth(Alignment.CenterHorizontally)
+                    CircularProgressIndicator(
+                        modifier = Modifier.padding(top = 16.dp),
+                        color = Color(0xFF4285F4)
                     )
                 }
             }
@@ -178,7 +179,7 @@ fun ShelterRegister(
         if (errorMessage.isNotEmpty()) {
             Text(
                 text = errorMessage,
-                color = Color.Red,
+                color = Color(0xFFE74C3C),
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
