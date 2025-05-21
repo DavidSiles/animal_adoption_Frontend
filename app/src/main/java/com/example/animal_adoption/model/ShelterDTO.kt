@@ -3,7 +3,7 @@ package com.example.animal_adoption.model
 data class ShelterDTO (
     val id: Int,
     val sheltername: String,
-    val password: String,
+    val password: String
 )
 
 data class ShelterLoginRequest(
@@ -13,5 +13,5 @@ data class ShelterLoginRequest(
 
 data class ShelterRegisterRequest(
     val sheltername: String,
-    val password: String,
+    val password: String
 )

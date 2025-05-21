@@ -43,6 +43,7 @@ fun ShelterCreateAnimal(
     shelter: ShelterDTO?
 ) {
     val createNewAnimalMessageUiState by remoteShelterViewModel.createNewAnimalMessageUiState.collectAsState()
+    val shelterId = shelter?.id
     var reiacText by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -78,7 +79,6 @@ fun ShelterCreateAnimal(
         OutlinedTextField(
             value = reiacText,
             onValueChange = { newValue ->
-                // Permitir solo números
                 if (newValue.all { it.isDigit() }) {
                     reiacText = newValue
                 }
@@ -94,7 +94,7 @@ fun ShelterCreateAnimal(
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
-            label = { Text(text = "Name") },
+            label = { Text("Name") },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -103,15 +103,22 @@ fun ShelterCreateAnimal(
         Button(onClick = {
             errorMessage = ""
             when {
+                shelterId == null -> errorMessage = "Shelter ID is missing"
                 reiacText.isEmpty() -> errorMessage = "Please enter a valid reiac"
-                name.isEmpty() -> errorMessage = "Please enter a name"
+                name.isEmpty() || name.length > 20 -> errorMessage = "Name must be between 1 and 20 characters"
                 else -> {
                     val reiac = reiacText.toIntOrNull()
-                    if (reiac == null) {
-                        errorMessage = "Reiac must be a valid number"
+                    if (reiac == null || reiac <= 0) {
+                        errorMessage = "Reiac must be a positive number"
                     } else {
-                        Log.d("REIAC", "Reiac value: $reiac")
-                        remoteShelterViewModel.CreateNewAnimal(reiac, name, shelter) {}
+                        Log.d("CreateAnimal", "Attempting to create animal: reiac=$reiac, name=$name, shelterId=$shelterId")
+                        remoteShelterViewModel.createNewAnimal(reiac, name, shelterId) {
+                            // Clear form instead of navigating
+                            reiacText = ""
+                            name = ""
+                            errorMessage = ""
+                            connectMessage = false
+                        }
                         connectMessage = true
                     }
                 }
@@ -122,24 +129,42 @@ fun ShelterCreateAnimal(
 
         when (createNewAnimalMessageUiState) {
             is CreateNewAnimalMessageUiState.Success -> {
-                Text(text = "Create animal successful!", color = Color.Green, fontSize = 16.sp, modifier = Modifier.padding(top = 8.dp))
+                Text(
+                    text = "Animal created successfully!",
+                    color = Color.Green,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
                 val shelterJson = Gson().toJson(shelter)
                 navController.navigate("ShelterHome/$shelterJson") {
-                    popUpTo("ShelterCreateAnimal") { inclusive = true }
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
                 }
             }
             is CreateNewAnimalMessageUiState.Error -> {
-                errorMessage = "create animal failed. Please check the reiac or name."
+                errorMessage = (createNewAnimalMessageUiState as CreateNewAnimalMessageUiState.Error).message
             }
             is CreateNewAnimalMessageUiState.Loading -> {
                 if (connectMessage) {
-                    Text(text = "Connecting...", color = Color.Blue, fontSize = 16.sp, modifier = Modifier.padding(top = 8.dp))
+                    Text(
+                        text = "Connecting...",
+                        color = Color.Blue,
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
                 }
             }
         }
 
         if (errorMessage.isNotEmpty()) {
-            Text(text = errorMessage, color = Color.Red, fontSize = 14.sp, modifier = Modifier.padding(top = 8.dp))
+            Text(
+                text = errorMessage,
+                color = if (errorMessage == "Animal created successfully!") Color.Green else Color.Red,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(top = 8.dp)
+            )
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.animal_adoption.model
 
+
 class AnimalDTO (
     val id: Integer,
     val reiac: Int,
@@ -7,8 +8,9 @@ class AnimalDTO (
     val shelterId: Int
 )
 
-data class CreateNewAnimalRequest(
+data class newAnimal(
     val reiac: Int,
     val name: String,
     val shelterId: Int?
 )
+
