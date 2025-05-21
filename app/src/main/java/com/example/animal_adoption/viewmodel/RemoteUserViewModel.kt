@@ -86,7 +86,7 @@ class RemoteUserViewModel : ViewModel() {
     }
 
     // Login
-    fun login(username: String, password: String, onSuccess: (Integer) -> Unit) {
+    fun login(username: String, password: String, onSuccess: (UserDTO) -> Unit) {
         viewModelScope.launch {
             _loginMessageUiState.value = com.example.animal_adoption.viewmodel.LoginMessageUiState.Loading
             try {
@@ -96,7 +96,7 @@ class RemoteUserViewModel : ViewModel() {
                 _loginMessageUiState.value = com.example.animal_adoption.viewmodel.LoginMessageUiState.Success(user)
 
                 // Pasamos el nurseId al callback de éxito
-                onSuccess(user.id)
+                onSuccess(user)
             } catch (e: Exception) {
                 Log.e("Login", "Error during login: ${e.message}", e)
                 _loginMessageUiState.value = com.example.animal_adoption.viewmodel.LoginMessageUiState.Error

@@ -1,0 +1,99 @@
+package com.example.animal_adoption.viewmodel
+
+import android.util.Log
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.animal_adoption.model.AnimalDTO
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.Path
+
+interface RemoteAnimalInterface {
+    @GET("shelters/{shelterId}")
+    suspend fun getAnimalsByShelter(@Path("shelterId") shelterId: Int): List<AnimalDTO>
+
+    @GET("animal/{reiac}")
+    suspend fun getAnimalByReiac(@Path("reiac") reiac: Int): AnimalDTO
+
+    @GET("animal/name/{name}")
+    suspend fun getAnimalByName(@Path("name") name: String): AnimalDTO
+
+    @GET("animal/list")
+    suspend fun getAllAnimals(): List<AnimalDTO>
+}
+
+sealed interface AnimalUiState {
+    data class Success(val animals: List<AnimalDTO>) : AnimalUiState
+    data class OneAnimal(val animal: AnimalDTO) : AnimalUiState
+    object Error : AnimalUiState
+    object Loading : AnimalUiState
+}
+
+class RemoteAnimalViewModel : ViewModel() {
+
+    private val _animalUiState = MutableStateFlow<AnimalUiState>(AnimalUiState.Loading)
+    val animalUiState: StateFlow<AnimalUiState> = _animalUiState
+
+    val retrofit = Retrofit.Builder()
+        .baseUrl("http://10.118.3.231:8080/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    private val animalService = retrofit.create(RemoteAnimalInterface::class.java)
+
+    fun getAnimalsByShelter(shelterId: Int) {
+        viewModelScope.launch {
+            _animalUiState.value = AnimalUiState.Loading
+            try {
+                val animals = animalService.getAnimalsByShelter(shelterId)
+                _animalUiState.value = AnimalUiState.Success(animals)
+            } catch (e: Exception) {
+                Log.e("AnimalViewModel", "Error fetching animals: ${e.message}")
+                _animalUiState.value = AnimalUiState.Error
+            }
+        }
+    }
+
+    fun getAnimalByReiac(reiac: Int) {
+        viewModelScope.launch {
+            _animalUiState.value = AnimalUiState.Loading
+            try {
+                val animal = animalService.getAnimalByReiac(reiac)
+                _animalUiState.value = AnimalUiState.OneAnimal(animal)
+            } catch (e: Exception) {
+                Log.e("AnimalViewModel", "Error fetching animal by REIAC: ${e.message}")
+                _animalUiState.value = AnimalUiState.Error
+            }
+        }
+    }
+
+    fun getAnimalByName(name: String) {
+        viewModelScope.launch {
+            _animalUiState.value = AnimalUiState.Loading
+            try {
+                val animal = animalService.getAnimalByName(name)
+                _animalUiState.value = AnimalUiState.OneAnimal(animal)
+            } catch (e: Exception) {
+                Log.e("AnimalViewModel", "Error fetching animal by name: ${e.message}")
+                _animalUiState.value = AnimalUiState.Error
+            }
+        }
+    }
+
+    fun getAllAnimals() {
+        viewModelScope.launch {
+            _animalUiState.value = AnimalUiState.Loading
+            try {
+                val animals = animalService.getAllAnimals()
+                _animalUiState.value = AnimalUiState.Success(animals)
+            } catch (e: Exception) {
+                Log.e("AnimalViewModel", "Error fetching all animals: ${e.message}")
+                _animalUiState.value = AnimalUiState.Error
+            }
+        }
+    }
+}

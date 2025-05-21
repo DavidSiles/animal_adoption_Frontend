@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.animal_adoption.model.ShelterDTO
+import com.example.animal_adoption.model.UserDTO
 import com.example.animal_adoption.screens.FirsScreen
 import com.example.animal_adoption.screens.ShelterCreateAnimal
 import com.example.animal_adoption.screens.ShelterLogin
@@ -37,9 +38,9 @@ class MainActivity : ComponentActivity() {
                     composable("UserLogin") {
                         UserLogin(navController = navController, remoteUserViewModel = viewModel())
                     }
-                    composable("UserHome/{id}") { backStackEntry ->
-                        val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
-                        UserHome(navController = navController, id = id)
+                    composable("UserHome/{user}") { backStackEntry ->
+                        val user = deserializeUser(backStackEntry)
+                        UserHome(navController = navController, user = user)
                     }
                     composable("UserProfile/{id}") { backStackEntry ->
                         val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
@@ -69,6 +70,18 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+
+
+    private fun deserializeUser(backStackEntry: NavBackStackEntry): UserDTO? {
+        val userJson = backStackEntry.arguments?.getString("shelter")
+        return try {
+            userJson?.let { Gson().fromJson(it, UserDTO::class.java) }
+        } catch (e: Exception) {
+            Log.e("Navigation", "Error deserializing UserDTO: ${e.message}", e)
+            null
         }
     }
 

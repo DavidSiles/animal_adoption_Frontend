@@ -126,8 +126,8 @@ fun UserLogin(
         Button(
             onClick = {
                 errorMessage = ""
-                remoteUserViewModel.login(username, password) { id ->
-                    navController.navigate("UserHome/$id")
+                remoteUserViewModel.login(username, password) { user ->
+                    navController.navigate("UserHome/$user")
                 }
                 connectMessage = true
             },

@@ -19,6 +19,13 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 
+sealed interface ShelterUiState {
+    data class Success(val shelters: List<ShelterDTO>) : ShelterUiState
+    data class OneShelter(val shelter: ShelterDTO) : ShelterUiState
+    object Error : ShelterUiState
+    object Loading : ShelterUiState
+}
+
 sealed interface ShelterRemoteMessageUiState {
     data class Success(val remoteMessage: List<ShelterDTO>) : ShelterRemoteMessageUiState
 
@@ -55,9 +62,16 @@ interface RemoteShelterInterface {
 
     @POST("animal/new")
     suspend fun ShelterCreateNewAnimal(@Body createNewAnimalRequest: CreateNewAnimalRequest): AnimalDTO
+
+    @GET("shelters/list")
+    suspend fun getAllShelters(): List<ShelterDTO>
 }
 
 class RemoteShelterViewModel : ViewModel() {
+
+    private val _shelterUiState = MutableStateFlow<ShelterUiState>(
+        ShelterUiState.Loading)
+    val shelterUiState: StateFlow<ShelterUiState> = _shelterUiState
 
     private val _remoteMessageUiState = MutableStateFlow<ShelterRemoteMessageUiState>(
         ShelterRemoteMessageUiState.Loading)
@@ -73,8 +87,9 @@ class RemoteShelterViewModel : ViewModel() {
 
     //ip del emulador 10.0.0.2.
     //ip del movil DavidSiles 10.0.22.100
+    //ip del móvil de FiorellaMoncayo 10.118.3.231:8080
     val connection = Retrofit.Builder()
-        .baseUrl("http://10.0.22.100:8080/")
+        .baseUrl("http://10.118.3.231:8080/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -86,6 +101,8 @@ class RemoteShelterViewModel : ViewModel() {
 
     private val _animal = MutableStateFlow<AnimalDTO?>(null)
     val animal: StateFlow<AnimalDTO?> = _animal
+
+    //private val shelterService = connection.create(RemoteShelterInterface::class.java)
 
     // Get all sheter
     fun getRemoteShelter() {
@@ -155,7 +172,11 @@ class RemoteShelterViewModel : ViewModel() {
         viewModelScope.launch {
             _createNewAnimalMessageUiState.value = CreateNewAnimalMessageUiState.Loading
             try {
-                val registerRequest = CreateNewAnimalRequest(reiac = reiac, name = name, shelter = shelter)
+                val registerRequest = CreateNewAnimalRequest(
+                    reiac = reiac,
+                    name = name,
+                    shelterId = shelter?.id
+                )
                 val animal = remoteService.ShelterCreateNewAnimal(registerRequest)
                 Log.d("Create animal", "Animal created successfully: $animal")
                 _createNewAnimalMessageUiState.value = CreateNewAnimalMessageUiState.Success(animal)
@@ -166,5 +187,40 @@ class RemoteShelterViewModel : ViewModel() {
             }
         }
     }
+
+    fun getAllShelters() {
+        viewModelScope.launch {
+            _shelterUiState.value = ShelterUiState.Loading
+            try {
+                val shelters = remoteService.getAllShelters()
+                _shelterUiState.value = ShelterUiState.Success(shelters)
+            } catch (e: Exception) {
+                Log.e("ShelterViewModel", "Error fetching all shelters: ${e.message}")
+                _shelterUiState.value = ShelterUiState.Error
+            }
+        }
+    }
+
+
+
+
+
+
+    private val _shelterMap = MutableStateFlow<Map<Int, String>>(emptyMap())
+    val shelterMap: StateFlow<Map<Int, String>> = _shelterMap
+
+    fun loadShelters() {
+        viewModelScope.launch {
+            try {
+                val shelters = remoteService.getAllShelters()
+                _shelterMap.value = shelters.associateBy({ it.id }, { it.sheltername })
+            } catch (e: Exception) {
+                Log.e("ShelterViewModel", "Error loading shelters: ${e.message}")
+            }
+        }
+    }
+
+
+
 
 }
