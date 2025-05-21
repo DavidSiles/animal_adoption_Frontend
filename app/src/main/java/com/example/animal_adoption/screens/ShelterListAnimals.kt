@@ -50,7 +50,7 @@ fun ShelterListAnimals(
             onSuccess = { animals ->
                 Log.d("ShelterListAnimals", "Success: Fetched ${animals?.size ?: 0} animals")
                 animals?.forEach { animal ->
-                    Log.d("ShelterListAnimals", "Animal: ${animal?.name}, REIAC: ${animal?.reiac}")
+                    Log.d("ShelterListAnimals", "Animal: ${animal.name}, REIAC: ${animal.reiac}, REIAC: ${animal.shelterId}")
                 }
             },
             onFailure = { errorMessage ->

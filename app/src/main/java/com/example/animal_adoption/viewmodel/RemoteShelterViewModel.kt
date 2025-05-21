@@ -71,7 +71,7 @@ interface RemoteShelterInterface {
     suspend fun getRemoteShelter(): List<ShelterDTO>
 
     @GET("animal/shelterList/{shelterId}")
-    suspend fun getShelterListAnimals(@Path("shelterId") shelterId: Integer): List<AnimalDTO>
+    suspend fun getShelterListAnimals(@Path("shelterId") shelterId: Int): List<AnimalDTO>
 
     @POST("shelters/login")
     suspend fun shelterLogin(@Body loginRequest: ShelterLoginRequest): ShelterDTO
@@ -86,7 +86,7 @@ interface RemoteShelterInterface {
     suspend fun getAllShelters(): List<ShelterDTO>
   
     @DELETE("shelters/{shelterId}")
-    suspend fun deleteShelter(@Path("shelterId") shelterId: Integer): Response<Unit>
+    suspend fun deleteShelter(@Path("shelterId") shelterId: Int): Response<Unit>
 }
 
 class RemoteShelterViewModel : ViewModel() {
@@ -127,7 +127,7 @@ class RemoteShelterViewModel : ViewModel() {
     //ip del movil DavidSiles 10.0.22.100
     //ip del movil FioMoncayo 10.118.3.231
     val connection = Retrofit.Builder()
-        .baseUrl("http://10.0.22.100:8080/")
+        .baseUrl("http://10.0.2.2:8080/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -204,7 +204,7 @@ class RemoteShelterViewModel : ViewModel() {
         }
     }
 
-    fun getShelterAnimals(shelterId: Integer, onSuccess: (List<AnimalDTO>?) -> Unit, onFailure: (String) -> Unit) {
+    fun getShelterAnimals(shelterId: Int, onSuccess: (List<AnimalDTO>?) -> Unit, onFailure: (String) -> Unit) {
         viewModelScope.launch {
             _getShelterAnimalsListMessage.value = GetShelterAnimalsListMessageUiState.Loading
             try {
@@ -235,7 +235,7 @@ class RemoteShelterViewModel : ViewModel() {
         }
     }
 
-    fun createNewAnimal(reiac: Int, name: String, shelterId: Integer?, onSuccess: (AnimalDTO?) -> Unit) {
+    fun createNewAnimal(reiac: Int, name: String, shelterId: Int?, onSuccess: (AnimalDTO?) -> Unit) {
         viewModelScope.launch {
             _createNewAnimalMessageUiState.value = CreateNewAnimalMessageUiState.Loading
             try {
@@ -299,7 +299,7 @@ class RemoteShelterViewModel : ViewModel() {
         }
     }
 
-    fun deleteShelter(shelterId: Integer, onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
+    fun deleteShelter(shelterId: Int, onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
         viewModelScope.launch {
             _deleteShelterMessageUiState.value = DeleteShelterMessageUiState.Loading
             try {
