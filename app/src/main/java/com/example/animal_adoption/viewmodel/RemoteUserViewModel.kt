@@ -66,8 +66,8 @@ class RemoteUserViewModel : ViewModel() {
 
     private val remoteService = connection.create(com.example.animal_adoption.viewmodel.RemoteUserInterface::class.java)
 
-    private val _id = MutableStateFlow<Integer?>(null)
-    val id: StateFlow<Integer?> = _id
+    private val _id = MutableStateFlow<Int?>(null)
+    val id: StateFlow<Int?> = _id
 
     // Get all users
     fun getRemoteUser() {
@@ -105,7 +105,7 @@ class RemoteUserViewModel : ViewModel() {
     }
 
     // Registro
-    fun register(username: String, password: String, onSuccess: (Integer) -> Unit) {
+    fun register(username: String, password: String, onSuccess: (Int) -> Unit) {
         viewModelScope.launch {
             _loginMessageUiState.value = com.example.animal_adoption.viewmodel.LoginMessageUiState.Loading
             try {

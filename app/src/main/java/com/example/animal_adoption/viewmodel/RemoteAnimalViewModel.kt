@@ -6,9 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.example.animal_adoption.model.AnimalDTO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Path
 
@@ -24,6 +27,9 @@ interface RemoteAnimalInterface {
 
     @GET("animal/list")
     suspend fun getAllAnimals(): List<AnimalDTO>
+
+    @DELETE("animal/{animalId}")
+    suspend fun deleteAnimal(@Path("animalId") animalId: Int): Response<Unit>
 }
 
 sealed interface AnimalUiState {
@@ -33,10 +39,19 @@ sealed interface AnimalUiState {
     object Loading : AnimalUiState
 }
 
+sealed interface DeleteAnimalMessageUiState {
+    data class Success(val message: String) : DeleteAnimalMessageUiState
+    data class Error(val message: String) : DeleteAnimalMessageUiState
+    object Loading : DeleteAnimalMessageUiState
+}
+
 class RemoteAnimalViewModel : ViewModel() {
 
     private val _animalUiState = MutableStateFlow<AnimalUiState>(AnimalUiState.Loading)
     val animalUiState: StateFlow<AnimalUiState> = _animalUiState
+
+    private val _deleteAnimalMessageUiState = MutableStateFlow<DeleteAnimalMessageUiState>(DeleteAnimalMessageUiState.Loading)
+    val deleteAnimalMessageUiState: StateFlow<DeleteAnimalMessageUiState> = _deleteAnimalMessageUiState.asStateFlow()
 
     val retrofit = Retrofit.Builder()
         .baseUrl("http://10.0.2.2:8080/")
@@ -93,6 +108,35 @@ class RemoteAnimalViewModel : ViewModel() {
             } catch (e: Exception) {
                 Log.e("AnimalViewModel", "Error fetching all animals: ${e.message}")
                 _animalUiState.value = AnimalUiState.Error
+            }
+        }
+    }
+
+    fun deleteAnimal(animalId: Int, onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
+        viewModelScope.launch {
+            _deleteAnimalMessageUiState.value = DeleteAnimalMessageUiState.Loading
+            try {
+                val response = animalService.deleteAnimal(animalId)
+                if (response.isSuccessful) {
+                    val successMessage = "Shelter deleted successfully"
+                    Log.d("DeleteAnimal", successMessage)
+                    _deleteAnimalMessageUiState.value = DeleteAnimalMessageUiState.Success(successMessage)
+                    onSuccess(successMessage)
+                } else {
+                    val errorMessage = when (response.code()) {
+                        400 -> "Invalid animal ID"
+                        404 -> "Animal not found"
+                        else -> "Failed to delete animal: ${response.message()}"
+                    }
+                    Log.e("DeleteAnimal", "HTTP error during deletion: ${response.message()}, Code: ${response.code()}")
+                    _deleteAnimalMessageUiState.value = DeleteAnimalMessageUiState.Error(errorMessage)
+                    onFailure(errorMessage)
+                }
+            } catch (e: Exception) {
+                Log.e("DeleteAnimal", "Error during deletion: ${e.message}", e)
+                val errorMessage = "Failed to delete animal: ${e.message}"
+                _deleteAnimalMessageUiState.value = DeleteAnimalMessageUiState.Error(errorMessage)
+                onFailure(errorMessage)
             }
         }
     }

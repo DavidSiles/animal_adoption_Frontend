@@ -2,7 +2,7 @@ package com.example.animal_adoption.model
 
 
 class AnimalDTO (
-    val id: Integer,
+    val id: Int,
     val reiac: Int,
     val name: String,
     val shelterId: Int

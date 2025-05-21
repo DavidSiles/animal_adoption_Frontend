@@ -18,6 +18,8 @@ import androidx.navigation.NavController
 import com.example.animal_adoption.model.AnimalDTO
 import com.example.animal_adoption.model.ShelterDTO
 import com.google.gson.Gson
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Composable
 fun AnimalCard(animal: AnimalDTO, shelter: ShelterDTO, navController: NavController) {
@@ -28,7 +30,9 @@ fun AnimalCard(animal: AnimalDTO, shelter: ShelterDTO, navController: NavControl
             .clickable {
                 val animalJson = Gson().toJson(animal)
                 val shelterJson = Gson().toJson(shelter)
-                navController.navigate("ShelterAnimalView/$animalJson/$shelterJson")
+                val encodedAnimalJson = URLEncoder.encode(animalJson, StandardCharsets.UTF_8.toString())
+                val encodedShelterJson = URLEncoder.encode(shelterJson, StandardCharsets.UTF_8.toString())
+                navController.navigate("ShelterAnimalView/$encodedAnimalJson/$encodedShelterJson")
             },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
