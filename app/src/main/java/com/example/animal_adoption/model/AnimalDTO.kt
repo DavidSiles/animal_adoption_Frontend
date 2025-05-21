@@ -8,3 +8,9 @@ data class AnimalDTO(
     @SerializedName("name") val name: String,
     @SerializedName("shelter_id") val shelterId: Integer?
 )
+
+data class newAnimal(
+    val reiac: Int,
+    val name: String,
+    val shelterId: Integer?
+)

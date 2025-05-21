@@ -146,7 +146,7 @@ fun ShelterConfiguration(
                 when (deleteShelterMessageUiState) {
                     is DeleteShelterMessageUiState.Success -> {
                         LaunchedEffect(Unit) {
-                            navController.navigate("ShelterRegister") {
+                            navController.navigate("FirstScreen") {
                                 popUpTo(navController.graph.startDestinationId) {
                                     inclusive = true
                                 }

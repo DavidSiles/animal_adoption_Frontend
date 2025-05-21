@@ -34,6 +34,7 @@ import androidx.navigation.NavHostController
 import com.example.animal_adoption.model.ShelterDTO
 import com.example.animal_adoption.viewmodel.CreateNewAnimalMessageUiState
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
+import com.google.gson.Gson
 
 @Composable
 fun ShelterCreateAnimal(
@@ -104,7 +105,7 @@ fun ShelterCreateAnimal(
             when {
                 shelterId == null -> errorMessage = "Shelter ID is missing"
                 reiacText.isEmpty() -> errorMessage = "Please enter a valid reiac"
-                name.isEmpty() || name.length > 50 -> errorMessage = "Name must be between 1 and 50 characters"
+                name.isEmpty() || name.length > 20 -> errorMessage = "Name must be between 1 and 20 characters"
                 else -> {
                     val reiac = reiacText.toIntOrNull()
                     if (reiac == null || reiac <= 0) {
@@ -115,7 +116,7 @@ fun ShelterCreateAnimal(
                             // Clear form instead of navigating
                             reiacText = ""
                             name = ""
-                            errorMessage = "Animal created successfully!"
+                            errorMessage = ""
                             connectMessage = false
                         }
                         connectMessage = true
@@ -134,6 +135,13 @@ fun ShelterCreateAnimal(
                     fontSize = 16.sp,
                     modifier = Modifier.padding(top = 8.dp)
                 )
+                val shelterJson = Gson().toJson(shelter)
+                navController.navigate("ShelterHome/$shelterJson") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
             }
             is CreateNewAnimalMessageUiState.Error -> {
                 errorMessage = (createNewAnimalMessageUiState as CreateNewAnimalMessageUiState.Error).message

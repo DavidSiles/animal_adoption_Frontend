@@ -44,6 +44,7 @@ import com.example.animal_adoption.R
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
 import com.example.animal_adoption.viewmodel.ShelterRegisterMessageUiState
 import com.google.gson.Gson
+import java.net.URLEncoder
 
 @Composable
 fun ShelterRegister(

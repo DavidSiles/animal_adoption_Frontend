@@ -165,7 +165,7 @@ fun ShelterProfile(
                             onClick = {
                                 Log.d("ShelterProfile", "Opción seleccionada: Cerrar sesión")
                                 showMenu = false
-                                navController.navigate("ShelterLogin") {
+                                navController.navigate("FirstScreen") {
                                     popUpTo(navController.graph.startDestinationId) {
                                         inclusive = true
                                     }

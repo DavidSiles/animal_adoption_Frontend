@@ -10,8 +10,10 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.animal_adoption.model.AnimalDTO
 import com.example.animal_adoption.model.ShelterDTO
-import com.example.animal_adoption.screens.FirsScreen
+import com.example.animal_adoption.screens.FirstScreen
+import com.example.animal_adoption.screens.ShelterAnimalView
 import com.example.animal_adoption.screens.ShelterConfiguration
 import com.example.animal_adoption.screens.ShelterCreateAnimal
 import com.example.animal_adoption.screens.ShelterHome
@@ -33,7 +35,7 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 NavHost(navController = navController, startDestination = "FirstScreen") {
                     composable("FirstScreen") {
-                        FirsScreen(navController = navController)
+                        FirstScreen(navController = navController)
                     }
 
                     composable("UserLogin") {
@@ -77,6 +79,16 @@ class MainActivity : ComponentActivity() {
                         val shelter = deserializeShelter(backStackEntry)
                         ShelterConfiguration(navController = navController, remoteShelterViewModel = viewModel(), shelter = shelter)
                     }
+                    composable("ShelterAnimalView/{animal}/{shelter}") { backStackEntry ->
+                        val animal = deserializeAnimal(backStackEntry)
+                        val shelter = deserializeShelter(backStackEntry)
+                        ShelterAnimalView(
+                            navController = navController,
+                            remoteShelterViewModel = viewModel(),
+                            animal = animal,
+                            shelter = shelter
+                        )
+                    }
                 }
             }
         }
@@ -86,6 +98,16 @@ class MainActivity : ComponentActivity() {
         val shelterJson = backStackEntry.arguments?.getString("shelter")
         return try {
             shelterJson?.let { Gson().fromJson(it, ShelterDTO::class.java) }
+        } catch (e: Exception) {
+            Log.e("Navigation", "Error deserializing ShelterDTO: ${e.message}", e)
+            null
+        }
+    }
+
+    private fun deserializeAnimal(backStackEntry: NavBackStackEntry): AnimalDTO? {
+        val animalJson = backStackEntry.arguments?.getString("shelter")
+        return try {
+            animalJson?.let { Gson().fromJson(it, AnimalDTO::class.java) }
         } catch (e: Exception) {
             Log.e("Navigation", "Error deserializing ShelterDTO: ${e.message}", e)
             null

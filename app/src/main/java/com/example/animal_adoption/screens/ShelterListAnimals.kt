@@ -16,9 +16,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.animal_adoption.model.AnimalDTO
 import com.example.animal_adoption.model.ShelterDTO
+import com.example.animal_adoption.screens.widgets.AnimalCard
 import com.example.animal_adoption.screens.widgets.ShelterBottomBar
 import com.example.animal_adoption.viewmodel.GetShelterAnimalsListMessageUiState
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
+import com.google.gson.Gson
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,6 +49,9 @@ fun ShelterListAnimals(
             shelterId = shelter.id,
             onSuccess = { animals ->
                 Log.d("ShelterListAnimals", "Success: Fetched ${animals?.size ?: 0} animals")
+                animals?.forEach { animal ->
+                    Log.d("ShelterListAnimals", "Animal: ${animal?.name}, REIAC: ${animal?.reiac}")
+                }
             },
             onFailure = { errorMessage ->
                 Log.e("ShelterListAnimals", "Failure: $errorMessage")
@@ -68,7 +75,6 @@ fun ShelterListAnimals(
             }
             is GetShelterAnimalsListMessageUiState.Success -> {
                 val animals = (uiState as GetShelterAnimalsListMessageUiState.Success).getShelterAnimalsListMessage
-                Log.d("ShelterListAnimals", "Animals received: ${animals?.size ?: 0}")
                 if (animals.isNullOrEmpty()) {
                     Box(
                         modifier = Modifier
@@ -87,7 +93,7 @@ fun ShelterListAnimals(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         items(animals.filterNotNull()) { animal ->
-                            AnimalCard(animal)
+                            AnimalCard(animal, shelter, navController)
                         }
                     }
                 }
@@ -120,29 +126,6 @@ fun ShelterListAnimals(
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun AnimalCard(animal: AnimalDTO) {
-    Log.d("AnimalCard", "name: ${animal.name}, reiac: ${animal.reiac}, shelterId: ${animal.shelterId}")
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(10.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = animal.name,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "REIAC: ${animal.reiac}")
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "Shelter ID: ${animal.shelterId ?: "N/A"}")
         }
     }
 }
