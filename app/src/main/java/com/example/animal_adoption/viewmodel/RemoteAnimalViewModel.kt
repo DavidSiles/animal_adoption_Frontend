@@ -39,7 +39,7 @@ class RemoteAnimalViewModel : ViewModel() {
     val animalUiState: StateFlow<AnimalUiState> = _animalUiState
 
     val retrofit = Retrofit.Builder()
-        .baseUrl("http://10.118.3.231:8080/")
+        .baseUrl("http://10.0.2.2:8080/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 

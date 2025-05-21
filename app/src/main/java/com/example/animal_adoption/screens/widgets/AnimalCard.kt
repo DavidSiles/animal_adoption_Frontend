@@ -36,7 +36,7 @@ fun AnimalCard(animal: AnimalDTO, shelter: ShelterDTO, navController: NavControl
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = "Name: ${animal.name ?: "Unknown"}",
+                text = "Name: ${animal.name}",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
