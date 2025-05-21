@@ -85,7 +85,7 @@ class MainActivity : ComponentActivity() {
                         val shelter = deserializeShelter(backStackEntry)
                         ShelterAnimalView(
                             navController = navController,
-                            remoteShelterViewModel = viewModel(),
+                            remoteAnimalViewModel = viewModel(),
                             animal = animal,
                             shelter = shelter
                         )
@@ -98,7 +98,7 @@ class MainActivity : ComponentActivity() {
 
 
     private fun deserializeUser(backStackEntry: NavBackStackEntry): UserDTO? {
-        val userJson = backStackEntry.arguments?.getString("shelter")
+        val userJson = backStackEntry.arguments?.getString("user")
         return try {
             userJson?.let { Gson().fromJson(it, UserDTO::class.java) }
         } catch (e: Exception) {
@@ -118,7 +118,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun deserializeAnimal(backStackEntry: NavBackStackEntry): AnimalDTO? {
-        val animalJson = backStackEntry.arguments?.getString("shelter")
+        val animalJson = backStackEntry.arguments?.getString("animal")
         return try {
             animalJson?.let { Gson().fromJson(it, AnimalDTO::class.java) }
         } catch (e: Exception) {
