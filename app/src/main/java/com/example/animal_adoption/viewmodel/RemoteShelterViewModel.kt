@@ -22,6 +22,7 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import com.google.gson.Gson
 import retrofit2.Response
+import retrofit2.http.PUT
 
 sealed interface ShelterUiState {
     data class Success(val shelters: List<ShelterDTO>) : ShelterUiState
@@ -60,6 +61,12 @@ sealed interface GetShelterAnimalsListMessageUiState {
     object Loading : GetShelterAnimalsListMessageUiState
 }
 
+sealed interface UpdateShelterMessageUiState {
+    data class Success(val shelter: ShelterDTO) : UpdateShelterMessageUiState
+    data class Error(val message: String) : UpdateShelterMessageUiState
+    object Loading : UpdateShelterMessageUiState
+}
+
 sealed interface DeleteShelterMessageUiState {
     data class Success(val message: String) : DeleteShelterMessageUiState
     data class Error(val message: String) : DeleteShelterMessageUiState
@@ -84,7 +91,10 @@ interface RemoteShelterInterface {
 
     @GET("shelters/list")
     suspend fun getAllShelters(): List<ShelterDTO>
-  
+
+    @PUT("shelters/{sheltername}")
+    suspend fun updateShelter(@Path("sheltername") sheltername: String, @Body shelter: ShelterDTO): ShelterDTO
+
     @DELETE("shelters/{shelterId}")
     suspend fun deleteShelter(@Path("shelterId") shelterId: Int): Response<Unit>
 }
@@ -111,6 +121,9 @@ class RemoteShelterViewModel : ViewModel() {
     private val _getShelterAnimalsListMessage = MutableStateFlow<GetShelterAnimalsListMessageUiState>(GetShelterAnimalsListMessageUiState.Loading)
     val getShelterAnimalsListMessage: StateFlow<GetShelterAnimalsListMessageUiState> = _getShelterAnimalsListMessage.asStateFlow()
 
+    private val _updateShelterMessageUiState = MutableStateFlow<UpdateShelterMessageUiState>(UpdateShelterMessageUiState.Loading)
+    val updateShelterMessageUiState: StateFlow<UpdateShelterMessageUiState> = _updateShelterMessageUiState.asStateFlow()
+
     private val _deleteShelterMessageUiState = MutableStateFlow<DeleteShelterMessageUiState>(DeleteShelterMessageUiState.Loading)
     val deleteShelterMessageUiState: StateFlow<DeleteShelterMessageUiState> = _deleteShelterMessageUiState.asStateFlow()
 
@@ -127,7 +140,7 @@ class RemoteShelterViewModel : ViewModel() {
     //ip del movil DavidSiles 10.0.22.100
     //ip del movil FioMoncayo 10.118.3.231
     val connection = Retrofit.Builder()
-        .baseUrl("http://10.0.2.2:8080/")
+        .baseUrl("http://10.0.22.100:8080/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -295,6 +308,41 @@ class RemoteShelterViewModel : ViewModel() {
                 _shelterMap.value = shelters.associateBy({ it.id }, { it.sheltername })
             } catch (e: Exception) {
                 Log.e("ShelterViewModel", "Error loading shelters: ${e.message}")
+            }
+        }
+    }
+
+    fun updateShelter(
+        updatedShelter: ShelterDTO,
+        shelter: ShelterDTO,
+        onSuccess: (ShelterDTO) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            _updateShelterMessageUiState.value = UpdateShelterMessageUiState.Loading
+            try {
+                val newUpdatedShelter = remoteService.updateShelter(
+                    sheltername = updatedShelter.sheltername,
+                    shelter = updatedShelter
+                )
+                _updateShelterMessageUiState.value = UpdateShelterMessageUiState.Success(newUpdatedShelter)
+                _shelter.value = newUpdatedShelter // Update the shelter state correctly
+                onSuccess(newUpdatedShelter)
+            } catch (e: HttpException) {
+                Log.e("UpdateShelter", "HTTP error during update: ${e.message}", e)
+                val errorMessage = when (e.code()) {
+                    400 -> "Invalid shelter data"
+                    401 -> "Unauthorized: Invalid credentials"
+                    404 -> "Shelter not found"
+                    else -> "Failed to update shelter: ${e.message}"
+                }
+                _updateShelterMessageUiState.value = UpdateShelterMessageUiState.Error(errorMessage)
+                onFailure(errorMessage)
+            } catch (e: Exception) {
+                Log.e("UpdateShelter", "Error updating shelter: ${e.message}", e)
+                val errorMessage = "Failed to update shelter: ${e.message}"
+                _updateShelterMessageUiState.value = UpdateShelterMessageUiState.Error(errorMessage)
+                onFailure(errorMessage)
             }
         }
     }

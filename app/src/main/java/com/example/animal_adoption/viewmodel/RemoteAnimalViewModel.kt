@@ -67,8 +67,11 @@ class RemoteAnimalViewModel : ViewModel() {
     private val _deleteAnimalMessageUiState = MutableStateFlow<DeleteAnimalMessageUiState>(DeleteAnimalMessageUiState.Loading)
     val deleteAnimalMessageUiState: StateFlow<DeleteAnimalMessageUiState> = _deleteAnimalMessageUiState.asStateFlow()
 
+    //ip del emulador 10.0.2.2.
+    //ip del movil DavidSiles 10.0.22.100
+    //ip del movil FioMoncayo 10.118.3.231
     val retrofit = Retrofit.Builder()
-        .baseUrl("http://10.0.2.2:8080/")
+        .baseUrl("http://10.0.22.100:8080/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -139,7 +142,7 @@ class RemoteAnimalViewModel : ViewModel() {
                 onSuccess(animal)
             } catch (e: Exception) {
                 Log.e("AnimalViewModel", "Error fetching all animals: ${e.message}")
-                _animalUiState.value = AnimalUiState.Error
+                _updateAnimalMessageUiState.value = UpdateAnimalMessageUiState.Error
             }
         }
     }

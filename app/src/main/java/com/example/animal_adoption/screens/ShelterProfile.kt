@@ -23,6 +23,8 @@ import androidx.navigation.NavHostController
 import com.example.animal_adoption.model.ShelterDTO
 import com.example.animal_adoption.screens.widgets.ShelterBottomBar
 import com.google.gson.Gson
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -138,7 +140,9 @@ fun ShelterProfile(
                             onClick = {
                                 Log.d("ShelterProfile", "Opción seleccionada: Editar perfil")
                                 showMenu = false
-                                // TODO: Añadir acción, e.g., navController.navigate("ShelterEditProfile")
+                                val shelterJson = Gson().toJson(shelter)
+                                val encodedShelterJson = URLEncoder.encode(shelterJson, StandardCharsets.UTF_8.toString())
+                                navController.navigate("ShelterUpdateData/$encodedShelterJson")
                             }
                         )
                         DropdownMenuItem(
