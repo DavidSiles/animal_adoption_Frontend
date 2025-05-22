@@ -11,8 +11,10 @@ import kotlinx.coroutines.launch
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface RemoteAnimalInterface {
@@ -28,6 +30,9 @@ interface RemoteAnimalInterface {
     @GET("animal/list")
     suspend fun getAllAnimals(): List<AnimalDTO>
 
+    @PUT("animal/{updatedAnimal}")
+    suspend fun updateAnimal(@Body updatedAnimal: AnimalDTO): AnimalDTO
+
     @DELETE("animal/{animalId}")
     suspend fun deleteAnimal(@Path("animalId") animalId: Int): Response<Unit>
 }
@@ -37,6 +42,12 @@ sealed interface AnimalUiState {
     data class OneAnimal(val animal: AnimalDTO) : AnimalUiState
     object Error : AnimalUiState
     object Loading : AnimalUiState
+}
+
+sealed interface UpdateAnimalMessageUiState {
+    data class Success(val animal: AnimalDTO) : UpdateAnimalMessageUiState
+    object Error : UpdateAnimalMessageUiState
+    object Loading : UpdateAnimalMessageUiState
 }
 
 sealed interface DeleteAnimalMessageUiState {
@@ -49,6 +60,9 @@ class RemoteAnimalViewModel : ViewModel() {
 
     private val _animalUiState = MutableStateFlow<AnimalUiState>(AnimalUiState.Loading)
     val animalUiState: StateFlow<AnimalUiState> = _animalUiState
+
+    private val _updateAnimalMessageUiState = MutableStateFlow<UpdateAnimalMessageUiState>(UpdateAnimalMessageUiState.Loading)
+    val updateAnimalMessageUiState: StateFlow<UpdateAnimalMessageUiState> = _updateAnimalMessageUiState.asStateFlow()
 
     private val _deleteAnimalMessageUiState = MutableStateFlow<DeleteAnimalMessageUiState>(DeleteAnimalMessageUiState.Loading)
     val deleteAnimalMessageUiState: StateFlow<DeleteAnimalMessageUiState> = _deleteAnimalMessageUiState.asStateFlow()
@@ -105,6 +119,24 @@ class RemoteAnimalViewModel : ViewModel() {
             try {
                 val animals = animalService.getAllAnimals()
                 _animalUiState.value = AnimalUiState.Success(animals)
+            } catch (e: Exception) {
+                Log.e("AnimalViewModel", "Error fetching all animals: ${e.message}")
+                _animalUiState.value = AnimalUiState.Error
+            }
+        }
+    }
+
+    fun updateAnimal(
+        updatedAnimal: AnimalDTO,
+        onSuccess: (AnimalDTO) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            _updateAnimalMessageUiState .value = UpdateAnimalMessageUiState .Loading
+            try {
+                val animal= animalService.updateAnimal(updatedAnimal)
+                _updateAnimalMessageUiState.value = UpdateAnimalMessageUiState.Success(animal)
+                onSuccess(animal)
             } catch (e: Exception) {
                 Log.e("AnimalViewModel", "Error fetching all animals: ${e.message}")
                 _animalUiState.value = AnimalUiState.Error
