@@ -76,10 +76,11 @@ class RemoteUserViewModel : ViewModel() {
     val user: StateFlow<UserDTO?> = _user.asStateFlow()
 
     //ip del emulador 10.0.0.2.
+
     //ip del movil DavidSiles 10.0.22.100
     //ip del movil FioMoncayo 10.118.3.231
     val connection = Retrofit.Builder()
-        .baseUrl("http://10.0.2.2:8080/")
+        .baseUrl("http://10.0.22.100:8080/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
