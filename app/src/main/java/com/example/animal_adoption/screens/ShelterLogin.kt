@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.animal_adoption.R
+import com.example.animal_adoption.viewmodel.NetworkModule.WithServiceInitialization
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
 import com.example.animal_adoption.viewmodel.ShelterLoginMessageUiState
 import com.google.gson.Gson
@@ -51,6 +52,10 @@ fun ShelterLogin(
     navController: NavHostController,
     remoteShelterViewModel: RemoteShelterViewModel
 ) {
+    WithServiceInitialization(
+        viewModel = remoteShelterViewModel,
+        isServiceInitialized = remoteShelterViewModel.isServiceInitialized
+    ) {
     val shelterLoginMessageUiState by remoteShelterViewModel.loginMessageUiState.collectAsState()
     var sheltername by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -202,5 +207,6 @@ fun ShelterLogin(
                 )
             }
         }
+    }
     }
 }

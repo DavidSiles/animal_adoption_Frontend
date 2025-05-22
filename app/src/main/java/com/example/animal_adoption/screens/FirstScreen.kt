@@ -24,6 +24,7 @@ val Poppins = FontFamily.Default
 
 @Composable
 fun FirstScreen(navController: NavHostController) {
+
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(R.drawable.fondo2),

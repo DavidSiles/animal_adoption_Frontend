@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.animal_adoption.R
 import com.example.animal_adoption.viewmodel.LoginMessageUiState
+import com.example.animal_adoption.viewmodel.NetworkModule.WithServiceInitialization
 import com.example.animal_adoption.viewmodel.RemoteUserViewModel
 
 @Composable
@@ -50,6 +51,10 @@ fun UserRegister(
     navController: NavHostController,
     remoteUserViewModel: RemoteUserViewModel
 ) {
+    WithServiceInitialization(
+        viewModel = remoteUserViewModel,
+        isServiceInitialized = remoteUserViewModel.isServiceInitialized
+    ) {
     val loginMessageUiState by remoteUserViewModel.loginMessageUiState.collectAsState()
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -148,14 +153,26 @@ fun UserRegister(
 
         when (loginMessageUiState) {
             is LoginMessageUiState.Success -> {
-                Text(text = "Registration successful!", color = Color.Green, fontSize = 16.sp, modifier = Modifier.padding(top = 8.dp))
+                Text(
+                    text = "Registration successful!",
+                    color = Color.Green,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
             }
+
             is LoginMessageUiState.Error -> {
                 errorMessage = "Register failed. Please check your username or password."
             }
+
             is LoginMessageUiState.Loading -> {
                 if (connectMessage) {
-                    Text(text = "Connecting...", color = Color.Blue, fontSize = 16.sp, modifier = Modifier.padding(top = 8.dp))
+                    Text(
+                        text = "Connecting...",
+                        color = Color.Blue,
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
                 }
             }
         }
@@ -167,7 +184,8 @@ fun UserRegister(
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .fillMaxWidth())
+                    .fillMaxWidth()
+            )
         }
 
         Row(
@@ -186,4 +204,5 @@ fun UserRegister(
             }
         }
     }
+}
 }

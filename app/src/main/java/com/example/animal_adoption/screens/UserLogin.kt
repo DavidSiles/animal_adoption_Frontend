@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.animal_adoption.R
 import com.example.animal_adoption.viewmodel.LoginMessageUiState
+import com.example.animal_adoption.viewmodel.NetworkModule.WithServiceInitialization
 import com.example.animal_adoption.viewmodel.RemoteUserViewModel
 import com.google.gson.Gson
 
@@ -50,6 +51,10 @@ fun UserLogin(
     navController: NavHostController,
     remoteUserViewModel: RemoteUserViewModel
 ) {
+    WithServiceInitialization(
+        viewModel = remoteUserViewModel,
+        isServiceInitialized = remoteUserViewModel.isServiceInitialized
+    ) {
     val loginMessageUiState by remoteUserViewModel.loginMessageUiState.collectAsState()
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -202,5 +207,6 @@ fun UserLogin(
             }
         }
 
+    }
     }
 }

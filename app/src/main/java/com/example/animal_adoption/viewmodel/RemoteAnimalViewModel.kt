@@ -1,5 +1,6 @@
 package com.example.animal_adoption.viewmodel
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -56,7 +57,7 @@ sealed interface DeleteAnimalMessageUiState {
     object Loading : DeleteAnimalMessageUiState
 }
 
-class RemoteAnimalViewModel : ViewModel() {
+class RemoteAnimalViewModel(context: Context) : ViewModel() {
 
     private val _animalUiState = MutableStateFlow<AnimalUiState>(AnimalUiState.Loading)
     val animalUiState: StateFlow<AnimalUiState> = _animalUiState
@@ -66,7 +67,7 @@ class RemoteAnimalViewModel : ViewModel() {
 
     private val _deleteAnimalMessageUiState = MutableStateFlow<DeleteAnimalMessageUiState>(DeleteAnimalMessageUiState.Loading)
     val deleteAnimalMessageUiState: StateFlow<DeleteAnimalMessageUiState> = _deleteAnimalMessageUiState.asStateFlow()
-
+/*
     //ip del emulador 10.0.2.2.
     //ip del movil DavidSiles 10.0.22.100
     //ip del movil FioMoncayo 10.118.3.231
@@ -76,6 +77,20 @@ class RemoteAnimalViewModel : ViewModel() {
         .build()
 
     private val animalService = retrofit.create(RemoteAnimalInterface::class.java)
+*/
+    //RemoteConnection
+    private lateinit var animalService: RemoteAnimalInterface
+
+    private val _isServiceInitialized = MutableStateFlow(false)
+    val isServiceInitialized: StateFlow<Boolean> = _isServiceInitialized.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            animalService = NetworkModule.createService< RemoteAnimalInterface>(context)
+            _isServiceInitialized.value = true
+            Log.d("RemoteViewModel", "Service initialized")
+        }
+    }
 
     fun getAnimalsByShelter(shelterId: Int) {
         viewModelScope.launch {
