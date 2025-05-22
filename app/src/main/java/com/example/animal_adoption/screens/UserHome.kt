@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.animal_adoption.model.UserDTO
+import com.example.animal_adoption.screens.widgets.UserBottomBar
 import com.example.animal_adoption.viewmodel.AnimalUiState
 import com.example.animal_adoption.viewmodel.RemoteAnimalViewModel
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
@@ -48,6 +49,9 @@ fun UserHome(
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("Welcome!") })
+        },
+        bottomBar = {
+            UserBottomBar(navController = navController, user = user)
         }
     ) { paddingValues ->
         Box(modifier = Modifier
@@ -88,4 +92,5 @@ fun UserHome(
             }
         }
     }
+
 }

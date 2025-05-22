@@ -27,6 +27,7 @@ import com.example.animal_adoption.screens.UserProfile
 import com.example.animal_adoption.screens.UserRegister
 import com.example.animal_adoption.screens.ShelterProfile
 import com.example.animal_adoption.screens.ShelterUpdateAnimal
+import com.example.animal_adoption.screens.UserConfiguration
 import com.google.gson.Gson
 
 class MainActivity : ComponentActivity() {
@@ -47,12 +48,16 @@ class MainActivity : ComponentActivity() {
                         val user = deserializeUser(backStackEntry)
                         UserHome(navController = navController, user = user)
                     }
-                    composable("UserProfile/{id}") { backStackEntry ->
-                        val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
-                        UserProfile(navController = navController, id = id)
+                    composable("UserProfile/{user}") { backStackEntry ->
+                        val user = deserializeUser(backStackEntry)
+                        UserProfile(navController = navController, user = user)
                     }
                     composable("UserRegister") {
                         UserRegister(navController = navController, remoteUserViewModel = viewModel())
+                    }
+                    composable("UserConfiguration/{user}") { backStackEntry ->
+                        val user = deserializeUser(backStackEntry)
+                        UserConfiguration(navController = navController, remoteUserViewModel = viewModel(), user = user)
                     }
 
                     composable("ShelterLogin") {

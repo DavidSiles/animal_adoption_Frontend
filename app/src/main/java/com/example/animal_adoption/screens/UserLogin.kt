@@ -43,6 +43,7 @@ import androidx.navigation.NavHostController
 import com.example.animal_adoption.R
 import com.example.animal_adoption.viewmodel.LoginMessageUiState
 import com.example.animal_adoption.viewmodel.RemoteUserViewModel
+import com.google.gson.Gson
 
 @Composable
 fun UserLogin(
@@ -127,7 +128,8 @@ fun UserLogin(
             onClick = {
                 errorMessage = ""
                 remoteUserViewModel.login(username, password) { user ->
-                    navController.navigate("UserHome/$user")
+                    val userJson = Gson().toJson(user)
+                    navController.navigate("UserHome/$userJson")
                 }
                 connectMessage = true
             },
