@@ -27,6 +27,7 @@ import com.example.animal_adoption.screens.UserProfile
 import com.example.animal_adoption.screens.UserRegister
 import com.example.animal_adoption.screens.ShelterProfile
 import com.example.animal_adoption.screens.ShelterUpdateAnimal
+import com.example.animal_adoption.screens.ShelterUpdateData
 import com.google.gson.Gson
 
 class MainActivity : ComponentActivity() {
@@ -98,6 +99,14 @@ class MainActivity : ComponentActivity() {
                             navController = navController,
                             remoteAnimalViewModel = viewModel(),
                             animal = animal,
+                            shelter = shelter
+                        )
+                    }
+                    composable("ShelterUpdateData/{shelter}") { backStackEntry ->
+                        val shelter = deserializeShelter(backStackEntry)
+                        ShelterUpdateData(
+                            navController = navController,
+                            remoteShelterViewModel = viewModel(),
                             shelter = shelter
                         )
                     }
