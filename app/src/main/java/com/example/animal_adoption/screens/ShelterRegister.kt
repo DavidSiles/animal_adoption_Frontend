@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.animal_adoption.R
+import com.example.animal_adoption.viewmodel.NetworkModule.WithServiceInitialization
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
 import com.example.animal_adoption.viewmodel.ShelterRegisterMessageUiState
 import com.google.gson.Gson
@@ -51,155 +52,166 @@ fun ShelterRegister(
     navController: NavHostController,
     remoteShelterViewModel: RemoteShelterViewModel
 ) {
-    val registerMessageUiState by remoteShelterViewModel.registerMessageUiState.collectAsState()
-    var sheltername by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf("") }
-    var connectMessage by remember { mutableStateOf(false) }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.Start
+    WithServiceInitialization(
+        viewModel = remoteShelterViewModel,
+        isServiceInitialized = remoteShelterViewModel.isServiceInitialized
     ) {
-        IconButton(onClick = {
-            navController.navigate("FirstScreen") {
-                popUpTo(navController.graph.startDestinationId) {
-                    inclusive = true
-                }
-                launchSingleTop = true
-            }
-        }) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Back to home"
-            )
-        }
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            painter = painterResource(R.drawable.logotuons2),
-            contentDescription = "App Logo",
-            modifier = Modifier
-                .size(150.dp)
-                .padding(bottom = 32.dp),
-            contentScale = ContentScale.Fit
-        )
-
-        Text(
-            text = "Create Shelter Account",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF333333),
-            modifier = Modifier.padding(bottom = 24.dp)
-        )
-
-        OutlinedTextField(
-            value = sheltername,
-            onValueChange = { sheltername = it },
-            label = { Text("Shelter name") },
-            singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 12.dp),
-            shape = RoundedCornerShape(12.dp)
-        )
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 24.dp),
-            shape = RoundedCornerShape(12.dp)
-        )
-
-        Button(
-            onClick = {
-                errorMessage = ""
-                when {
-                    sheltername.isEmpty() -> errorMessage = "Please enter a shelter name"
-                    password.isEmpty() -> errorMessage = "Please enter a password"
-                    else -> {
-                        remoteShelterViewModel.shelterRegister(sheltername, password) { shelter ->
-                            val shelterJson = Gson().toJson(shelter)
-                            navController.navigate("ShelterHome/$shelterJson")
-                        }
-                        connectMessage = true
-                    }
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF4285F4),
-                contentColor = Color.White
-            )
-        ) {
-            Text("Register", fontSize = 18.sp)
-        }
-
-        when (registerMessageUiState) {
-            is ShelterRegisterMessageUiState.Success -> {
-                Text(
-                    text = "Registration successful!",
-                    color = Color(0xFF2ECC71),
-                    fontSize = 16.sp,
-                    modifier = Modifier
-                        .padding(top = 16.dp)
-                        .fillMaxWidth()
-                        .wrapContentWidth(Alignment.CenterHorizontally)
-                )
-            }
-            is ShelterRegisterMessageUiState.Error -> {
-                errorMessage = (registerMessageUiState as ShelterRegisterMessageUiState.Error).message
-            }
-            is ShelterRegisterMessageUiState.Loading -> {
-                if (connectMessage) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.padding(top = 16.dp),
-                        color = Color(0xFF4285F4)
-                    )
-                }
-            }
-        }
-
-        if (errorMessage.isNotEmpty()) {
-            Text(
-                text = errorMessage,
-                color = Color(0xFFE74C3C),
-                fontSize = 14.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
-        }
+        val registerMessageUiState by remoteShelterViewModel.registerMessageUiState.collectAsState()
+        var sheltername by remember { mutableStateOf("") }
+        var password by remember { mutableStateOf("") }
+        var errorMessage by remember { mutableStateOf("") }
+        var connectMessage by remember { mutableStateOf(false) }
 
         Row(
-            modifier = Modifier.padding(top = 32.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.Start
         ) {
-            Text("Already have an account? ", color = Color(0xFF666666))
-            TextButton(
-                onClick = { navController.navigate("ShelterLogin") }
-            ) {
-                Text(
-                    text = "Sign In",
-                    color = Color(0xFF4285F4),
-                    fontWeight = FontWeight.Bold
+            IconButton(onClick = {
+                navController.navigate("FirstScreen") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
+            }) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back to home"
                 )
+            }
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(R.drawable.logotuons2),
+                contentDescription = "App Logo",
+                modifier = Modifier
+                    .size(150.dp)
+                    .padding(bottom = 32.dp),
+                contentScale = ContentScale.Fit
+            )
+
+            Text(
+                text = "Create Shelter Account",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF333333),
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+
+            OutlinedTextField(
+                value = sheltername,
+                onValueChange = { sheltername = it },
+                label = { Text("Shelter name") },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                shape = RoundedCornerShape(12.dp)
+            )
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
+                shape = RoundedCornerShape(12.dp)
+            )
+
+            Button(
+                onClick = {
+                    errorMessage = ""
+                    when {
+                        sheltername.isEmpty() -> errorMessage = "Please enter a shelter name"
+                        password.isEmpty() -> errorMessage = "Please enter a password"
+                        else -> {
+                            remoteShelterViewModel.shelterRegister(
+                                sheltername,
+                                password
+                            ) { shelter ->
+                                val shelterJson = Gson().toJson(shelter)
+                                navController.navigate("ShelterHome/$shelterJson")
+                            }
+                            connectMessage = true
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF4285F4),
+                    contentColor = Color.White
+                )
+            ) {
+                Text("Register", fontSize = 18.sp)
+            }
+
+            when (registerMessageUiState) {
+                is ShelterRegisterMessageUiState.Success -> {
+                    Text(
+                        text = "Registration successful!",
+                        color = Color(0xFF2ECC71),
+                        fontSize = 16.sp,
+                        modifier = Modifier
+                            .padding(top = 16.dp)
+                            .fillMaxWidth()
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                    )
+                }
+
+                is ShelterRegisterMessageUiState.Error -> {
+                    errorMessage =
+                        (registerMessageUiState as ShelterRegisterMessageUiState.Error).message
+                }
+
+                is ShelterRegisterMessageUiState.Loading -> {
+                    if (connectMessage) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.padding(top = 16.dp),
+                            color = Color(0xFF4285F4)
+                        )
+                    }
+                }
+            }
+
+            if (errorMessage.isNotEmpty()) {
+                Text(
+                    text = errorMessage,
+                    color = Color(0xFFE74C3C),
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            }
+
+            Row(
+                modifier = Modifier.padding(top = 32.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Already have an account? ", color = Color(0xFF666666))
+                TextButton(
+                    onClick = { navController.navigate("ShelterLogin") }
+                ) {
+                    Text(
+                        text = "Sign In",
+                        color = Color(0xFF4285F4),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }

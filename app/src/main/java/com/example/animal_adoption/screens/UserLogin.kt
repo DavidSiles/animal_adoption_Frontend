@@ -42,127 +42,119 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.animal_adoption.R
 import com.example.animal_adoption.viewmodel.LoginMessageUiState
+import com.example.animal_adoption.viewmodel.NetworkModule.WithServiceInitialization
 import com.example.animal_adoption.viewmodel.RemoteUserViewModel
+import com.google.gson.Gson
 
 @Composable
 fun UserLogin(
     navController: NavHostController,
     remoteUserViewModel: RemoteUserViewModel
 ) {
-    val loginMessageUiState by remoteUserViewModel.loginMessageUiState.collectAsState()
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf("") }
-    var connectMessage by remember { mutableStateOf(false) }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.Start
+    WithServiceInitialization(
+        viewModel = remoteUserViewModel,
+        isServiceInitialized = remoteUserViewModel.isServiceInitialized
     ) {
-        IconButton(onClick = {
-            navController.navigate("FirstScreen") {
-                popUpTo(navController.graph.startDestinationId) {
-                    inclusive = true
-                }
-                launchSingleTop = true
-            }
-        })
-        {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Back to home"
-            )
-        }
-    }
+        val loginMessageUiState by remoteUserViewModel.loginMessageUiState.collectAsState()
+        var username by remember { mutableStateOf("") }
+        var password by remember { mutableStateOf("") }
+        var errorMessage by remember { mutableStateOf("") }
+        var connectMessage by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            painter = painterResource(R.drawable.logotuons2),
-            contentDescription = "App Logo",
-            modifier = Modifier
-                .size(150.dp)
-                .padding(bottom = 32.dp),
-            contentScale = ContentScale.Fit
-        )
-
-        Text(
-            text = "User Login",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF333333),
-            modifier = Modifier.padding(bottom = 24.dp)
-        )
-
-        OutlinedTextField(
-            value = username,
-            onValueChange = { username = it },
-            label = { Text("Username") },
-            singleLine = true,
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 12.dp),
-            shape = RoundedCornerShape(12.dp)
-        )
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 24.dp),
-            shape = RoundedCornerShape(12.dp)
-        )
-
-        Button(
-            onClick = {
-                errorMessage = ""
-                remoteUserViewModel.login(username, password) { user ->
-                    navController.navigate("UserHome/$user")
-                }
-                connectMessage = true
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFFF7043),
-                contentColor = Color.White
-            )
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.Start
         ) {
-            Text("Login", fontSize = 18.sp)
-        }
-
-        when (loginMessageUiState) {
-            is LoginMessageUiState.Success -> {
-                Text(
-                    text = "Login successful!",
-                    color = Color(0xFF2ECC71),
-                    fontSize = 16.sp,
-                    modifier = Modifier
-                        .padding(top = 16.dp)
-                        .fillMaxWidth()
-                        .wrapContentWidth(Alignment.CenterHorizontally)
+            IconButton(onClick = {
+                navController.navigate("FirstScreen") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
+            })
+            {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back to home"
                 )
             }
-            is LoginMessageUiState.Error -> {
-                errorMessage = "Login failed. Please check your username or password."
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(R.drawable.logotuons2),
+                contentDescription = "App Logo",
+                modifier = Modifier
+                    .size(150.dp)
+                    .padding(bottom = 32.dp),
+                contentScale = ContentScale.Fit
+            )
+
+            Text(
+                text = "User Login",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF333333),
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+
+            OutlinedTextField(
+                value = username,
+                onValueChange = { username = it },
+                label = { Text("Username") },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                shape = RoundedCornerShape(12.dp)
+            )
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
+                shape = RoundedCornerShape(12.dp)
+            )
+
+            Button(
+                onClick = {
+                    errorMessage = ""
+                    remoteUserViewModel.login(username, password) { user ->
+                        val userJson = Gson().toJson(user)
+                        navController.navigate("UserHome/$userJson")
+                    }
+                    connectMessage = true
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFFF7043),
+                    contentColor = Color.White
+                )
+            ) {
+                Text("Login", fontSize = 18.sp)
             }
-            is LoginMessageUiState.Loading -> {
-                if (connectMessage) {
+
+            when (loginMessageUiState) {
+                is LoginMessageUiState.Success -> {
                     Text(
-                        text = "Connecting...",
-                        color = Color(0xFF3498DB),
+                        text = "Login successful!",
+                        color = Color(0xFF2ECC71),
                         fontSize = 16.sp,
                         modifier = Modifier
                             .padding(top = 16.dp)
@@ -170,35 +162,53 @@ fun UserLogin(
                             .wrapContentWidth(Alignment.CenterHorizontally)
                     )
                 }
+
+                is LoginMessageUiState.Error -> {
+                    errorMessage = "Login failed. Please check your username or password."
+                }
+
+                is LoginMessageUiState.Loading -> {
+                    if (connectMessage) {
+                        Text(
+                            text = "Connecting...",
+                            color = Color(0xFF3498DB),
+                            fontSize = 16.sp,
+                            modifier = Modifier
+                                .padding(top = 16.dp)
+                                .fillMaxWidth()
+                                .wrapContentWidth(Alignment.CenterHorizontally)
+                        )
+                    }
+                }
             }
-        }
 
-        if (errorMessage.isNotEmpty()) {
-            Text(
-                text = errorMessage,
-                color = Color(0xFFE74C3C),
-                fontSize = 14.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
-        }
-
-        Row(
-            modifier = Modifier.padding(top = 32.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("Don't have an account? ", color = Color(0xFF666666))
-            TextButton(
-                onClick = { navController.navigate("UserRegister") }
-            ) {
+            if (errorMessage.isNotEmpty()) {
                 Text(
-                    text = "Register",
-                    color = Color(0xFF4285F4),
-                    fontWeight = FontWeight.Bold
+                    text = errorMessage,
+                    color = Color(0xFFE74C3C),
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
                 )
             }
-        }
 
+            Row(
+                modifier = Modifier.padding(top = 32.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Don't have an account? ", color = Color(0xFF666666))
+                TextButton(
+                    onClick = { navController.navigate("UserRegister") }
+                ) {
+                    Text(
+                        text = "Register",
+                        color = Color(0xFF4285F4),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+        }
     }
 }

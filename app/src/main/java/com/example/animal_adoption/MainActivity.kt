@@ -1,10 +1,13 @@
 package com.example.animal_adoption
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.*
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
@@ -21,13 +24,16 @@ import com.example.animal_adoption.screens.ShelterHome
 import com.example.animal_adoption.screens.ShelterListAnimals
 import com.example.animal_adoption.screens.ShelterLogin
 import com.example.animal_adoption.screens.ShelterRegister
+import com.example.animal_adoption.screens.ShelterProfile
+import com.example.animal_adoption.screens.ShelterUpdateAnimal
+import com.example.animal_adoption.screens.ShelterUpdateData
 import com.example.animal_adoption.screens.UserHome
 import com.example.animal_adoption.screens.UserLogin
 import com.example.animal_adoption.screens.UserProfile
 import com.example.animal_adoption.screens.UserRegister
-import com.example.animal_adoption.screens.ShelterProfile
-import com.example.animal_adoption.screens.ShelterUpdateAnimal
-import com.example.animal_adoption.screens.ShelterUpdateData
+import com.example.animal_adoption.viewmodel.RemoteAnimalViewModel
+import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
+import com.example.animal_adoption.viewmodel.RemoteUserViewModel
 import com.google.gson.Gson
 
 class MainActivity : ComponentActivity() {
@@ -42,7 +48,11 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("UserLogin") {
-                        UserLogin(navController = navController, remoteUserViewModel = viewModel())
+                        val factory = RemoteUserViewModelFactory(applicationContext)
+                        UserLogin(
+                            navController = navController,
+                            remoteUserViewModel = viewModel(factory = factory)
+                        )
                     }
                     composable("UserHome/{user}") { backStackEntry ->
                         val user = deserializeUser(backStackEntry)
@@ -53,11 +63,19 @@ class MainActivity : ComponentActivity() {
                         UserProfile(navController = navController, id = id)
                     }
                     composable("UserRegister") {
-                        UserRegister(navController = navController, remoteUserViewModel = viewModel())
+                        val factory = RemoteUserViewModelFactory(applicationContext)
+                        UserRegister(
+                            navController = navController,
+                            remoteUserViewModel = viewModel(factory = factory)
+                        )
                     }
 
                     composable("ShelterLogin") {
-                        ShelterLogin(navController = navController, remoteShelterViewModel = viewModel())
+                        val factory = RemoteShelterViewModelFactory(applicationContext)
+                        ShelterLogin(
+                            navController = navController,
+                            remoteShelterViewModel = viewModel(factory = factory)
+                        )
                     }
                     composable("ShelterHome/{shelter}") { backStackEntry ->
                         val shelter = deserializeShelter(backStackEntry)
@@ -68,26 +86,46 @@ class MainActivity : ComponentActivity() {
                         ShelterProfile(navController = navController, shelter = shelter)
                     }
                     composable("ShelterRegister") {
-                        ShelterRegister(navController = navController, remoteShelterViewModel = viewModel())
+                        val factory = RemoteShelterViewModelFactory(applicationContext)
+                        ShelterRegister(
+                            navController = navController,
+                            remoteShelterViewModel = viewModel(factory = factory)
+                        )
                     }
                     composable("ShelterCreateAnimal/{shelter}") { backStackEntry ->
                         val shelter = deserializeShelter(backStackEntry)
-                        ShelterCreateAnimal(navController = navController, remoteShelterViewModel = viewModel(), shelter = shelter)
+                        val factory = RemoteShelterViewModelFactory(applicationContext)
+                        ShelterCreateAnimal(
+                            navController = navController,
+                            remoteShelterViewModel = viewModel(factory = factory),
+                            shelter = shelter
+                        )
                     }
                     composable("ShelterListAnimals/{shelter}") { backStackEntry ->
                         val shelter = deserializeShelter(backStackEntry)
-                        ShelterListAnimals(navController = navController, remoteShelterViewModel = viewModel(), shelter = shelter)
+                        val factory = RemoteShelterViewModelFactory(applicationContext)
+                        ShelterListAnimals(
+                            navController = navController,
+                            remoteShelterViewModel = viewModel(factory = factory),
+                            shelter = shelter
+                        )
                     }
                     composable("ShelterConfiguration/{shelter}") { backStackEntry ->
                         val shelter = deserializeShelter(backStackEntry)
-                        ShelterConfiguration(navController = navController, remoteShelterViewModel = viewModel(), shelter = shelter)
+                        val factory = RemoteShelterViewModelFactory(applicationContext)
+                        ShelterConfiguration(
+                            navController = navController,
+                            remoteShelterViewModel = viewModel(factory = factory),
+                            shelter = shelter
+                        )
                     }
                     composable("ShelterAnimalView/{animal}/{shelter}") { backStackEntry ->
                         val animal = deserializeAnimal(backStackEntry)
                         val shelter = deserializeShelter(backStackEntry)
+                        val factory = RemoteAnimalViewModelFactory(applicationContext)
                         ShelterAnimalView(
                             navController = navController,
-                            remoteAnimalViewModel = viewModel(),
+                            remoteAnimalViewModel = viewModel(factory = factory),
                             animal = animal,
                             shelter = shelter
                         )
@@ -95,18 +133,20 @@ class MainActivity : ComponentActivity() {
                     composable("ShelterUpdateAnimal/{animal}/{shelter}") { backStackEntry ->
                         val animal = deserializeAnimal(backStackEntry)
                         val shelter = deserializeShelter(backStackEntry)
+                        val factory = RemoteAnimalViewModelFactory(applicationContext)
                         ShelterUpdateAnimal(
                             navController = navController,
-                            remoteAnimalViewModel = viewModel(),
+                            remoteAnimalViewModel = viewModel(factory = factory),
                             animal = animal,
                             shelter = shelter
                         )
                     }
                     composable("ShelterUpdateData/{shelter}") { backStackEntry ->
                         val shelter = deserializeShelter(backStackEntry)
+                        val factory = RemoteShelterViewModelFactory(applicationContext)
                         ShelterUpdateData(
                             navController = navController,
-                            remoteShelterViewModel = viewModel(),
+                            remoteShelterViewModel = viewModel(factory = factory),
                             shelter = shelter
                         )
                     }
@@ -114,8 +154,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-
 
     private fun deserializeUser(backStackEntry: NavBackStackEntry): UserDTO? {
         val userJson = backStackEntry.arguments?.getString("user")
@@ -142,8 +180,38 @@ class MainActivity : ComponentActivity() {
         return try {
             animalJson?.let { Gson().fromJson(it, AnimalDTO::class.java) }
         } catch (e: Exception) {
-            Log.e("Navigation", "Error deserializing ShelterDTO: ${e.message}", e)
+            Log.e("Navigation", "Error deserializing AnimalDTO: ${e.message}", e)
             null
         }
+    }
+}
+
+class RemoteUserViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(RemoteUserViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return RemoteUserViewModel(context) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+class RemoteShelterViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(RemoteShelterViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return RemoteShelterViewModel(context) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+class RemoteAnimalViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(RemoteAnimalViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return RemoteAnimalViewModel(context) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

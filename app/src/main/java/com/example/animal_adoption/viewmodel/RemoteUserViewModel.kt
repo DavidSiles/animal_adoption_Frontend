@@ -1,5 +1,6 @@
 package com.example.animal_adoption.viewmodel
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,6 +9,7 @@ import com.example.animal_adoption.model.UserLoginRequest
 import com.example.animal_adoption.model.UserRegisterRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -45,7 +47,7 @@ interface RemoteUserInterface {
 
 }
 
-class RemoteUserViewModel : ViewModel() {
+class RemoteUserViewModel(context: Context) : ViewModel() {
 
     private val _remoteMessageUiState = MutableStateFlow<com.example.animal_adoption.viewmodel.RemoteMessageUiState>(
         com.example.animal_adoption.viewmodel.RemoteMessageUiState.Loading)
@@ -54,7 +56,7 @@ class RemoteUserViewModel : ViewModel() {
     private val _loginMessageUiState = MutableStateFlow<com.example.animal_adoption.viewmodel.LoginMessageUiState>(
         com.example.animal_adoption.viewmodel.LoginMessageUiState.Loading)
     var loginMessageUiState: StateFlow<com.example.animal_adoption.viewmodel.LoginMessageUiState> = _loginMessageUiState
-
+/*
     //ip del emulador 10.0.2.2.
     //ip del movil DavidSiles 10.0.22.100
     //ip del movil FioMoncayo 10.118.3.231
@@ -63,8 +65,21 @@ class RemoteUserViewModel : ViewModel() {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-
     private val remoteService = connection.create(com.example.animal_adoption.viewmodel.RemoteUserInterface::class.java)
+*/
+    //RemoteConnection
+    private lateinit var remoteService: RemoteUserInterface
+
+    private val _isServiceInitialized = MutableStateFlow(false)
+    val isServiceInitialized: StateFlow<Boolean> = _isServiceInitialized.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            remoteService = NetworkModule.createService<RemoteUserInterface>(context)
+            _isServiceInitialized.value = true
+            Log.d("RemoteViewModel", "Service initialized")
+        }
+    }
 
     private val _id = MutableStateFlow<Int?>(null)
     val id: StateFlow<Int?> = _id

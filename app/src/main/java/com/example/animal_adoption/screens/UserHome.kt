@@ -37,6 +37,7 @@ fun UserHome(
     animalViewModel: RemoteAnimalViewModel = viewModel(),
     shelterViewModel: RemoteShelterViewModel = viewModel()
 ) {
+
     val animalUiState by animalViewModel.animalUiState.collectAsState()
     val shelterMap by shelterViewModel.shelterMap.collectAsState(initial = emptyMap<Int, String>())
 

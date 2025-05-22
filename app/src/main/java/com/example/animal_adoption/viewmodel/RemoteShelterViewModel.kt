@@ -1,5 +1,6 @@
 package com.example.animal_adoption.viewmodel
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -99,7 +100,7 @@ interface RemoteShelterInterface {
     suspend fun deleteShelter(@Path("shelterId") shelterId: Int): Response<Unit>
 }
 
-class RemoteShelterViewModel : ViewModel() {
+class RemoteShelterViewModel(context: Context) : ViewModel() {
 
     private val _shelterUiState = MutableStateFlow<ShelterUiState>(
         ShelterUiState.Loading)
@@ -135,16 +136,31 @@ class RemoteShelterViewModel : ViewModel() {
 
     private val _animalList = MutableStateFlow<List<AnimalDTO>>(emptyList())
     val animalList: StateFlow<List<AnimalDTO>> = _animalList.asStateFlow()
-
+/*
     //ip del emulador 10.0.2.2
     //ip del movil DavidSiles 10.0.22.100
     //ip del movil FioMoncayo 10.118.3.231
-    val connection = Retrofit.Builder()
+    /*val connection = Retrofit.Builder()
         .baseUrl("http://10.0.22.100:8080/")
         .addConverterFactory(GsonConverterFactory.create())
-        .build()
+        .build()*/
 
     private val remoteService = connection.create(RemoteShelterInterface::class.java)
+*/
+    //RemoteConnection
+    private lateinit var remoteService: RemoteShelterInterface
+
+    private val _isServiceInitialized = MutableStateFlow(false)
+    val isServiceInitialized: StateFlow<Boolean> = _isServiceInitialized.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            remoteService = NetworkModule.createService< RemoteShelterInterface>(context)
+            _isServiceInitialized.value = true
+            Log.d("RemoteViewModel", "Service initialized")
+        }
+    }
+
 
     fun getRemoteShelter() {
         viewModelScope.launch {
@@ -169,8 +185,8 @@ class RemoteShelterViewModel : ViewModel() {
                 val shelter = remoteService.shelterLogin(loginRequest)
                 _shelter.value = shelter
                 Log.d("ShelterLogin", "Shelter after login: ${_shelter.value}")
-                _loginMessageUiState.value = ShelterLoginMessageUiState.Success(_shelter.value)
-                onSuccess(_shelter.value)
+                _loginMessageUiState.value = ShelterLoginMessageUiState.Success(shelter)
+                onSuccess(shelter)
             } catch (e: HttpException) {
                 Log.e("ShelterLogin", "HTTP error during login: ${e.message}", e)
                 val errorMessage = if (e.code() == 400 || e.code() == 401) {
@@ -197,8 +213,8 @@ class RemoteShelterViewModel : ViewModel() {
                 val shelter = remoteService.shelterRegister(registerRequest)
                 _shelter.value = shelter
                 Log.d("ShelterRegister", "Shelter after registration: ${_shelter.value}")
-                _registerMessageUiState.value = ShelterRegisterMessageUiState.Success(_shelter.value)
-                onSuccess(_shelter.value)
+                _registerMessageUiState.value = ShelterRegisterMessageUiState.Success(shelter)
+                onSuccess(shelter)
             } catch (e: HttpException) {
                 Log.e("ShelterRegister", "HTTP error during registration: ${e.message}", e)
                 val errorMessage = if (e.code() == 400) {
