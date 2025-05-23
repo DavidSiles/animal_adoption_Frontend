@@ -3,6 +3,7 @@ package com.example.animal_adoption.model
 data class UserDTO(
     val id: Int,
     val username: String,
+    @Transient
     val password: String,
 )
 

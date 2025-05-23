@@ -49,7 +49,15 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 NavHost(navController = navController, startDestination = "FirstScreen") {
                     composable("FirstScreen") {
-                        FirstScreen(navController = navController)
+                        val userFactory = RemoteUserViewModelFactory(applicationContext)
+                        val shelterFactory = RemoteShelterViewModelFactory(applicationContext)
+                        val animalFactory = RemoteAnimalViewModelFactory(applicationContext)
+                        FirstScreen(
+                            navController = navController,
+                            remoteUserViewModel = viewModel(factory = userFactory),
+                            remoteShelterViewModel = viewModel(factory = shelterFactory),
+                            remoteAnimalViewModel = viewModel(factory = animalFactory)
+                        )
                     }
 
                     composable("UserLogin") {
@@ -61,7 +69,14 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("UserHome/{user}") { backStackEntry ->
                         val user = deserializeUser(backStackEntry)
-                        UserHome(navController = navController, user = user)
+                        val factoryShelter = RemoteShelterViewModelFactory(applicationContext)
+                        val factoryAnimal = RemoteAnimalViewModelFactory(applicationContext)
+                        UserHome(
+                            navController = navController,
+                            user = user,
+                            animalViewModel = viewModel(factory = factoryAnimal),
+                            shelterViewModel = viewModel(factory = factoryShelter)
+                        )
                     }
                     composable("UserProfile/{user}") { backStackEntry ->
                         val user = deserializeUser(backStackEntry)
@@ -76,7 +91,12 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("UserConfiguration/{user}") { backStackEntry ->
                         val user = deserializeUser(backStackEntry)
-                        UserConfiguration(navController = navController, remoteUserViewModel = viewModel(), user = user)
+                        val factory = RemoteUserViewModelFactory(applicationContext)
+                        UserConfiguration(
+                            navController = navController,
+                            remoteUserViewModel = viewModel(factory = factory),
+                            user = user
+                        )
                     }
 
                     composable("ShelterLogin") {

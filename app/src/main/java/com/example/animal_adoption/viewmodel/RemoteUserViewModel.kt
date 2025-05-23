@@ -92,9 +92,14 @@ class RemoteUserViewModel(context: Context) : ViewModel() {
 
     init {
         viewModelScope.launch {
-            remoteService = NetworkModule.createService<RemoteUserInterface>(context)
-            _isServiceInitialized.value = true
-            Log.d("RemoteViewModel", "Service initialized")
+            try {
+                remoteService = NetworkModule.createService<RemoteUserInterface>(context)
+                _isServiceInitialized.value = true
+                Log.d("RemoteUserViewModel", "Service initialized")
+            } catch (e: Exception) {
+                Log.e("RemoteUserViewModel", "Failed to initialize service: ${e.message}", e)
+                _isServiceInitialized.value = false
+            }
         }
     }
 
@@ -137,7 +142,7 @@ class RemoteUserViewModel(context: Context) : ViewModel() {
     }
 
     // Registro
-    fun register(username: String, password: String, onSuccess: (Int) -> Unit) {
+    fun register(username: String, password: String, onSuccess: (UserDTO) -> Unit) {
         viewModelScope.launch {
             _loginMessageUiState.value = com.example.animal_adoption.viewmodel.LoginMessageUiState.Loading
             try {
@@ -147,7 +152,7 @@ class RemoteUserViewModel(context: Context) : ViewModel() {
                 _loginMessageUiState.value = com.example.animal_adoption.viewmodel.LoginMessageUiState.Success(user)
 
                 // Pasamos el nurseId al callback de éxito
-                onSuccess(user.id)
+                onSuccess(user)
             } catch (e: Exception) {
                 Log.e("Register", "Error during registration: ${e.message}", e)
                 _loginMessageUiState.value = com.example.animal_adoption.viewmodel.LoginMessageUiState.Error
@@ -177,7 +182,6 @@ class RemoteUserViewModel(context: Context) : ViewModel() {
                 if (response.isSuccessful) {
                     val successMessage = "User deleted successfully"
                     Log.d("DeleteUser", successMessage)
-                    _user.value = null
                     _deleteUserMessageUiState.value = DeleteUserMessageUiState.Success(successMessage)
                     onSuccess(successMessage)
                 } else {
