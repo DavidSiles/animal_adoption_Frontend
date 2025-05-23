@@ -5,18 +5,11 @@ import android.content.SharedPreferences
 import android.net.wifi.WifiManager
 import android.text.format.Formatter
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.example.animal_adoption.model.LoadingScreen
+import com.example.animal_adoption.screens.widgets.SplashScreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -126,9 +119,8 @@ object NetworkModule {
         content: @Composable () -> Unit
     ) {
         if (!isServiceInitialized) {
-            LoadingScreen(
+            SplashScreen(
                 modifier = modifier,
-                loadingText = "Connecting to server..."
             )
         } else {
             content()
