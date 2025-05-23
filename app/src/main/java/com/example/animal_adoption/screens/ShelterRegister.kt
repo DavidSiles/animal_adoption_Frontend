@@ -20,6 +20,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.animal_adoption.R
+import com.example.animal_adoption.model.FieldValidations
 import com.example.animal_adoption.viewmodel.NetworkModule.WithServiceInitialization
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
 import com.example.animal_adoption.viewmodel.ShelterRegisterMessageUiState
@@ -53,11 +55,14 @@ fun ShelterRegister(
     remoteShelterViewModel: RemoteShelterViewModel
 ) {
 
-        val registerMessageUiState by remoteShelterViewModel.registerMessageUiState.collectAsState()
-        var sheltername by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
-        var errorMessage by remember { mutableStateOf("") }
-        var connectMessage by remember { mutableStateOf(false) }
+    val registerMessageUiState by remoteShelterViewModel.registerMessageUiState.collectAsState()
+    var sheltername by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var shelternameError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
+    var errorMessage by remember { mutableStateOf("") }
+    var serverError by remember { mutableStateOf<String?>(null) }
+    var connectMessage by remember { mutableStateOf(false) }
 
         Row(
             modifier = Modifier
@@ -106,32 +111,66 @@ fun ShelterRegister(
 
             OutlinedTextField(
                 value = sheltername,
-                onValueChange = { sheltername = it },
-                label = { Text("Shelter name") },
+                onValueChange = { newValue ->
+                    sheltername = newValue
+                    shelternameError = FieldValidations.validateName(newValue)
+                },
+                label = { Text("Shelter Name") },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 12.dp),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                isError = shelternameError != null,
+                supportingText = {
+                    shelternameError?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
             )
 
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = { newValue ->
+                    password = newValue
+                    passwordError = FieldValidations.validatePassword(newValue)
+                },
                 label = { Text("Password") },
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 24.dp),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                isError = passwordError != null,
+                supportingText = {
+                    passwordError?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
             )
 
             Button(
                 onClick = {
-                    errorMessage = ""
+                    shelternameError = FieldValidations.validateName(sheltername)
+                    passwordError = FieldValidations.validatePassword(password)
+                    serverError = null
+
+                    if (shelternameError == null && passwordError == null) {
+                        remoteShelterViewModel.shelterLogin(sheltername, password) { shelter ->
+                            val shelterJson = Gson().toJson(shelter)
+                            navController.navigate("ShelterHome/$shelterJson")
+                        }
+                        connectMessage = true
+                    }
                     when {
-                        sheltername.isEmpty() -> errorMessage = "Please enter a shelter name"
-                        password.isEmpty() -> errorMessage = "Please enter a password"
                         else -> {
                             remoteShelterViewModel.shelterRegister(
                                 sheltername,
@@ -170,7 +209,7 @@ fun ShelterRegister(
                 }
 
                 is ShelterRegisterMessageUiState.Error -> {
-                    errorMessage =
+                    serverError =
                         (registerMessageUiState as ShelterRegisterMessageUiState.Error).message
                 }
 
@@ -184,14 +223,15 @@ fun ShelterRegister(
                 }
             }
 
-            if (errorMessage.isNotEmpty()) {
+            serverError?.let {
                 Text(
-                    text = errorMessage,
+                    text = it,
                     color = Color(0xFFE74C3C),
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(top = 16.dp)
                 )
             }
 
