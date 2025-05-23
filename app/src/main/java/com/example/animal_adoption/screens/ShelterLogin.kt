@@ -52,10 +52,7 @@ fun ShelterLogin(
     navController: NavHostController,
     remoteShelterViewModel: RemoteShelterViewModel
 ) {
-    WithServiceInitialization(
-        viewModel = remoteShelterViewModel,
-        isServiceInitialized = remoteShelterViewModel.isServiceInitialized
-    ) {
+
     val shelterLoginMessageUiState by remoteShelterViewModel.loginMessageUiState.collectAsState()
     var sheltername by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -207,6 +204,5 @@ fun ShelterLogin(
                 )
             }
         }
-    }
     }
 }

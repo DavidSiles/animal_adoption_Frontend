@@ -3,12 +3,7 @@ package com.example.animal_adoption.viewmodel
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.wifi.WifiManager
-import android.text.Layout.Alignment
 import android.text.format.Formatter
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -16,15 +11,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.Layout
-import androidx.lifecycle.ViewModel
+import com.example.animal_adoption.model.LoadingScreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
-import org.intellij.lang.annotations.JdkConstants
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.net.InetSocketAddress
@@ -37,6 +30,7 @@ object NetworkModule {
     private const val PREFS_NAME = "NetworkPrefs"
     private const val KEY_BACKEND_IP = "backend_ip"
     private const val SCAN_TIMEOUT_MS = 1000 // Timeout for each IP scan
+    @Volatile
     private var retrofit: Retrofit? = null
 
     suspend fun provideRetrofit(context: Context): Retrofit {
@@ -89,7 +83,7 @@ object NetworkModule {
 
         // Extract subnet (e.g., "192.168.1" from "192.168.1.56")
         val subnet = ipAddress.substringBeforeLast(".")
-        val ipRange = (1..254).map { "$subnet.$it" }
+        val ipRange = (1..50).map { "$subnet.$it" }
 
         // Scan IPs in parallel
         val deferredResults = ipRange.map { ip ->
@@ -117,6 +111,8 @@ object NetworkModule {
     fun saveBackendIp(context: Context, ip: String) {
         val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit().putString(KEY_BACKEND_IP, ip).apply()
+        // Reset retrofit to force reinitialization with new IP
+        retrofit = null
     }
 
     suspend inline fun <reified T> createService(context: Context): T {
@@ -124,28 +120,18 @@ object NetworkModule {
     }
 
     @Composable
-    fun <T : ViewModel> WithServiceInitialization(
-        viewModel: T,
-        isServiceInitialized: StateFlow<Boolean>,
+    fun WithServiceInitialization(
+        isServiceInitialized: Boolean,
+        modifier: Modifier = Modifier,
         content: @Composable () -> Unit
     ) {
-        var isLoading by remember { mutableStateOf(true) }
-
-        LaunchedEffect(Unit) {
-            isServiceInitialized.collectLatest { isInitialized ->
-                isLoading = !isInitialized
-            }
-        }
-
-        if (isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                CircularProgressIndicator()
-            }
+        if (!isServiceInitialized) {
+            LoadingScreen(
+                modifier = modifier,
+                loadingText = "Connecting to server..."
+            )
         } else {
             content()
         }
     }
 }
-

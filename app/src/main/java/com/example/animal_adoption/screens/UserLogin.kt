@@ -51,10 +51,7 @@ fun UserLogin(
     navController: NavHostController,
     remoteUserViewModel: RemoteUserViewModel
 ) {
-    WithServiceInitialization(
-        viewModel = remoteUserViewModel,
-        isServiceInitialized = remoteUserViewModel.isServiceInitialized
-    ) {
+
     val loginMessageUiState by remoteUserViewModel.loginMessageUiState.collectAsState()
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -207,6 +204,5 @@ fun UserLogin(
             }
         }
 
-    }
     }
 }

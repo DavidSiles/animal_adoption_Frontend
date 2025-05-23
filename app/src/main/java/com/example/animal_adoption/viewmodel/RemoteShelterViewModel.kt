@@ -155,9 +155,14 @@ class RemoteShelterViewModel(context: Context) : ViewModel() {
 
     init {
         viewModelScope.launch {
-            remoteService = NetworkModule.createService< RemoteShelterInterface>(context)
-            _isServiceInitialized.value = true
-            Log.d("RemoteViewModel", "Service initialized")
+            try {
+                remoteService = NetworkModule.createService<RemoteShelterInterface>(context)
+                _isServiceInitialized.value = true
+                Log.d("RemoteShelterViewModel", "Service initialized")
+            } catch (e: Exception) {
+                Log.e("RemoteShelterViewModel", "Failed to initialize service: ${e.message}", e)
+                _isServiceInitialized.value = false
+            }
         }
     }
 

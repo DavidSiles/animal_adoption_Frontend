@@ -45,16 +45,14 @@ import com.example.animal_adoption.R
 import com.example.animal_adoption.viewmodel.LoginMessageUiState
 import com.example.animal_adoption.viewmodel.NetworkModule.WithServiceInitialization
 import com.example.animal_adoption.viewmodel.RemoteUserViewModel
+import com.google.gson.Gson
 
 @Composable
 fun UserRegister(
     navController: NavHostController,
     remoteUserViewModel: RemoteUserViewModel
 ) {
-    WithServiceInitialization(
-        viewModel = remoteUserViewModel,
-        isServiceInitialized = remoteUserViewModel.isServiceInitialized
-    ) {
+
     val loginMessageUiState by remoteUserViewModel.loginMessageUiState.collectAsState()
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -132,10 +130,9 @@ fun UserRegister(
         Button(
             onClick = {
                 errorMessage = ""
-                remoteUserViewModel.register(username, password) { id ->
-                    Log.e("Navigating to UserHome with ID", "Navigating to UserHome with ID: $id")
-                    println("Navigating to UserHome with ID: $id")
-                    navController.navigate("UserHome/$id")
+                remoteUserViewModel.register(username, password) { user ->
+                    val userJson = Gson().toJson(user)
+                    navController.navigate("UserHome/$userJson")
                 }
                 connectMessage = true
             },
@@ -204,5 +201,4 @@ fun UserRegister(
             }
         }
     }
-}
 }

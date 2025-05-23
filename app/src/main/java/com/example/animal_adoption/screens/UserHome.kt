@@ -29,14 +29,15 @@ import com.example.animal_adoption.screens.widgets.UserBottomBar
 import com.example.animal_adoption.viewmodel.AnimalUiState
 import com.example.animal_adoption.viewmodel.RemoteAnimalViewModel
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
+import com.example.animal_adoption.viewmodel.RemoteUserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserHome(
     navController: NavHostController,
     user: UserDTO?,
-    animalViewModel: RemoteAnimalViewModel = viewModel(),
-    shelterViewModel: RemoteShelterViewModel = viewModel()
+    animalViewModel: RemoteAnimalViewModel,
+    shelterViewModel: RemoteShelterViewModel
 ) {
 
     val animalUiState by animalViewModel.animalUiState.collectAsState()

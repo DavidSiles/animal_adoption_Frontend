@@ -86,9 +86,14 @@ class RemoteAnimalViewModel(context: Context) : ViewModel() {
 
     init {
         viewModelScope.launch {
-            animalService = NetworkModule.createService< RemoteAnimalInterface>(context)
-            _isServiceInitialized.value = true
-            Log.d("RemoteViewModel", "Service initialized")
+            try {
+                animalService = NetworkModule.createService<RemoteAnimalInterface>(context)
+                _isServiceInitialized.value = true
+                Log.d("RemoteAnimalViewModel", "Service initialized")
+            } catch (e: Exception) {
+                Log.e("RemoteAnimalViewModel", "Failed to initialize service: ${e.message}", e)
+                _isServiceInitialized.value = false
+            }
         }
     }
 
