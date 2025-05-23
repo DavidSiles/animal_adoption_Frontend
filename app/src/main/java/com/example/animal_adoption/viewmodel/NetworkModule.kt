@@ -76,7 +76,7 @@ object NetworkModule {
 
         // Extract subnet (e.g., "192.168.1" from "192.168.1.56")
         val subnet = ipAddress.substringBeforeLast(".")
-        val ipRange = (1..50).map { "$subnet.$it" }
+        val ipRange = (1..100).map { "$subnet.$it" }
 
         // Scan IPs in parallel
         val deferredResults = ipRange.map { ip ->

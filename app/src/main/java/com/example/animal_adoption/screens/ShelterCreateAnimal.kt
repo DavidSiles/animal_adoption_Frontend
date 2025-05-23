@@ -9,12 +9,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +33,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.animal_adoption.model.FieldValidations
 import com.example.animal_adoption.model.ShelterDTO
 import com.example.animal_adoption.viewmodel.CreateNewAnimalMessageUiState
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
@@ -46,6 +49,8 @@ fun ShelterCreateAnimal(
     val shelterId = shelter?.id
     var reiacText by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
+    var reiacError by remember { mutableStateOf<String?>(null) }
+    var animalNameError by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf("") }
     var connectMessage by remember { mutableStateOf(false) }
 
@@ -79,14 +84,27 @@ fun ShelterCreateAnimal(
         OutlinedTextField(
             value = reiacText,
             onValueChange = { newValue ->
-                if (newValue.all { it.isDigit() }) {
+                if (newValue.all { it.isDigit() } || newValue.isEmpty()) {
                     reiacText = newValue
                 }
             },
             label = { Text("Reiac") },
-            singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth()
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp),
+            shape = RoundedCornerShape(12.dp),
+            isError = reiacError != null,
+            supportingText = {
+                reiacError?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -95,7 +113,21 @@ fun ShelterCreateAnimal(
             value = name,
             onValueChange = { name = it },
             label = { Text("Name") },
-            modifier = Modifier.fillMaxWidth()
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp),
+            shape = RoundedCornerShape(12.dp),
+            isError = animalNameError != null,
+            supportingText = {
+                animalNameError?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -105,21 +137,33 @@ fun ShelterCreateAnimal(
             when {
                 shelterId == null -> errorMessage = "Shelter ID is missing"
                 reiacText.isEmpty() -> errorMessage = "Please enter a valid reiac"
-                name.isEmpty() || name.length > 20 -> errorMessage = "Name must be between 1 and 20 characters"
                 else -> {
+                    // Validar reiac
                     val reiac = reiacText.toIntOrNull()
-                    if (reiac == null || reiac <= 0) {
-                        errorMessage = "Reiac must be a positive number"
+                    if (reiac == null) {
+                        errorMessage = "Reiac must be a valid number"
                     } else {
-                        Log.d("CreateAnimal", "Attempting to create animal: reiac=$reiac, name=$name, shelterId=$shelterId")
-                        remoteShelterViewModel.createNewAnimal(reiac, name, shelterId) {
-                            // Clear form instead of navigating
-                            reiacText = ""
-                            name = ""
-                            errorMessage = ""
-                            connectMessage = false
+                        val reiacError = FieldValidations.validateReiac(reiac)
+                        if (reiacError != null) {
+                            errorMessage = reiacError
+                        } else {
+                            // Validar animalName
+                            val nameError = FieldValidations.validateAnimalName(name)
+                            if (nameError != null) {
+                                errorMessage = nameError
+                            } else {
+                                // Si todas las validaciones pasan, crear el animal
+                                Log.d("CreateAnimal", "Attempting to create animal: reiac=$reiac, name=$name, shelterId=$shelterId")
+                                remoteShelterViewModel.createNewAnimal(reiac, name, shelterId) {
+                                    // Clear form
+                                    reiacText = ""
+                                    name = ""
+                                    errorMessage = ""
+                                    connectMessage = false
+                                }
+                                connectMessage = true
+                            }
                         }
-                        connectMessage = true
                     }
                 }
             }
