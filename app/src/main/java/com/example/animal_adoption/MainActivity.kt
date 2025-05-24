@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.*
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -13,6 +14,8 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
 import com.example.animal_adoption.model.AnimalDTO
 import com.example.animal_adoption.model.ShelterDTO
 import com.example.animal_adoption.model.UserDTO
@@ -38,8 +41,11 @@ import com.example.animal_adoption.screens.ShelterProfile
 import com.example.animal_adoption.screens.ShelterUpdateAnimal
 import com.example.animal_adoption.screens.UserConfiguration
 import com.example.animal_adoption.screens.ShelterUpdateData
+import com.example.animal_adoption.screens.UserAnimalView
 
 import com.google.gson.Gson
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,21 +73,56 @@ class MainActivity : ComponentActivity() {
                             remoteUserViewModel = viewModel(factory = factory)
                         )
                     }
-                    composable("UserHome/{user}") { backStackEntry ->
-                        val user = deserializeUser(backStackEntry)
-                        val factoryShelter = RemoteShelterViewModelFactory(applicationContext)
-                        val factoryAnimal = RemoteAnimalViewModelFactory(applicationContext)
-                        UserHome(
-                            navController = navController,
-                            user = user,
-                            animalViewModel = viewModel(factory = factoryAnimal),
-                            shelterViewModel = viewModel(factory = factoryShelter)
+
+                    composable("UserHome/{user}",
+                        arguments = listOf(
+                            navArgument("user") { type = NavType.StringType} //defino user explícitamente como string
                         )
+                    ) { backStackEntry ->
+                        val userString = backStackEntry.arguments?.getString("user")
+                        val user = userString?.let {
+                            try {
+                                // Decodificación necesaria porque estamos usando URLEncoder al navegar
+                                val decodedUserJson = URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
+                                Gson().fromJson(decodedUserJson, UserDTO::class.java)
+                            } catch (e: Exception) {
+                                Log.e("Navigation", "Error deserializing UserDTO for UserHome: ${e.message}", e)
+                                null
+                            }
+                        }
+                        if (user == null) {
+                            LaunchedEffect(Unit) {
+                                Log.e("NAV_DEBUG", "NavGraph - UserHome: UserDTO is null after deserialization. Redirecting to Login.")
+                                navController.navigate("UserLogin") {
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                }
+                            }
+                        } else {
+                            val factoryShelter = RemoteShelterViewModelFactory(applicationContext)
+                            val factoryAnimal = RemoteAnimalViewModelFactory(applicationContext)
+                            UserHome(
+                                navController = navController,
+                                user = user,
+                                animalViewModel = viewModel(factory = factoryAnimal),
+                                shelterViewModel = viewModel(factory = factoryShelter)
+                            )
+                        }
                     }
+
                     composable("UserProfile/{user}") { backStackEntry ->
-                        val user = deserializeUser(backStackEntry)
+                        val userString = backStackEntry.arguments?.getString("user")
+                        val user = userString?.let {
+                            try {
+                                val decodedUserJson = URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
+                                Gson().fromJson(decodedUserJson, UserDTO::class.java)
+                            } catch (e: Exception) {
+                                Log.e("Navigation", "Error deserializing UserDTO for UserProfile: ${e.message}", e)
+                                null
+                            }
+                        }
                         UserProfile(navController = navController, user = user)
                     }
+
                     composable("UserRegister") {
                         val factory = RemoteUserViewModelFactory(applicationContext)
                         UserRegister(
@@ -89,14 +130,57 @@ class MainActivity : ComponentActivity() {
                             remoteUserViewModel = viewModel(factory = factory)
                         )
                     }
+
                     composable("UserConfiguration/{user}") { backStackEntry ->
-                        val user = deserializeUser(backStackEntry)
+                        val userString = backStackEntry.arguments?.getString("user")
+                        val user = userString?.let {
+                            try {
+                                val decodedUserJson = URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
+                                Gson().fromJson(decodedUserJson, UserDTO::class.java)
+                            } catch (e: Exception) {
+                                Log.e("Navigation", "Error deserializing UserDTO for UserConfiguration: ${e.message}", e)
+                                null
+                            }
+                        }
                         val factory = RemoteUserViewModelFactory(applicationContext)
                         UserConfiguration(
                             navController = navController,
                             remoteUserViewModel = viewModel(factory = factory),
                             user = user
                         )
+                    }
+
+                    // --- UserAnimalView Route (Mantiene 'user' y 'animal' pero decodifica internamente) ---
+                    composable(route = "UserAnimalView/{animal}/{user}",
+                        arguments = listOf(
+                            navArgument("animal") { type = NavType.StringType },
+                            navArgument("user") { type = NavType.StringType }
+                        )
+                    ) { backStackEntry ->
+                        val animalString = backStackEntry.arguments?.getString("animal")
+                        val userString = backStackEntry.arguments?.getString("user")
+
+                        val animal = animalString?.let {
+                            try {
+                                val decodedAnimalJson = URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
+                                Gson().fromJson(decodedAnimalJson, AnimalDTO::class.java)
+                            } catch (e: Exception) {
+                                Log.e("Navigation", "Error deserializing AnimalDTO for UserAnimalView: ${e.message}", e)
+                                null
+                            }
+                        }
+
+                        val user = userString?.let {
+                            try {
+                                val decodedUserJson = URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
+                                Gson().fromJson(decodedUserJson, UserDTO::class.java)
+                            } catch (e: Exception) {
+                                Log.e("Navigation", "Error deserializing UserDTO for UserAnimalView: ${e.message}", e)
+                                null
+                            }
+                        }
+                        val shelterFactory = RemoteShelterViewModelFactory(applicationContext)
+                        UserAnimalView(navController = navController, animal = animal, user = user, shelterViewModel = viewModel(factory = shelterFactory))
                     }
 
                     composable("ShelterLogin") {
@@ -106,14 +190,17 @@ class MainActivity : ComponentActivity() {
                             remoteShelterViewModel = viewModel(factory = factory)
                         )
                     }
+
                     composable("ShelterHome/{shelter}") { backStackEntry ->
                         val shelter = deserializeShelter(backStackEntry)
                         ShelterHome(navController = navController, shelter = shelter)
                     }
+
                     composable("ShelterProfile/{shelter}") { backStackEntry ->
                         val shelter = deserializeShelter(backStackEntry)
                         ShelterProfile(navController = navController, shelter = shelter)
                     }
+
                     composable("ShelterRegister") {
                         val factory = RemoteShelterViewModelFactory(applicationContext)
                         ShelterRegister(
@@ -121,6 +208,7 @@ class MainActivity : ComponentActivity() {
                             remoteShelterViewModel = viewModel(factory = factory)
                         )
                     }
+
                     composable("ShelterCreateAnimal/{shelter}") { backStackEntry ->
                         val shelter = deserializeShelter(backStackEntry)
                         val factory = RemoteShelterViewModelFactory(applicationContext)
@@ -130,6 +218,7 @@ class MainActivity : ComponentActivity() {
                             shelter = shelter
                         )
                     }
+
                     composable("ShelterListAnimals/{shelter}") { backStackEntry ->
                         val shelter = deserializeShelter(backStackEntry)
                         val factory = RemoteShelterViewModelFactory(applicationContext)
@@ -139,6 +228,7 @@ class MainActivity : ComponentActivity() {
                             shelter = shelter
                         )
                     }
+
                     composable("ShelterConfiguration/{shelter}") { backStackEntry ->
                         val shelter = deserializeShelter(backStackEntry)
                         val factory = RemoteShelterViewModelFactory(applicationContext)
@@ -148,6 +238,7 @@ class MainActivity : ComponentActivity() {
                             shelter = shelter
                         )
                     }
+
                     composable("ShelterAnimalView/{animal}/{shelter}") { backStackEntry ->
                         val animal = deserializeAnimal(backStackEntry)
                         val shelter = deserializeShelter(backStackEntry)
@@ -159,6 +250,7 @@ class MainActivity : ComponentActivity() {
                             shelter = shelter
                         )
                     }
+
                     composable("ShelterUpdateAnimal/{animal}/{shelter}") { backStackEntry ->
                         val animal = deserializeAnimal(backStackEntry)
                         val shelter = deserializeShelter(backStackEntry)
@@ -170,6 +262,7 @@ class MainActivity : ComponentActivity() {
                             shelter = shelter
                         )
                     }
+
                     composable("ShelterUpdateData/{shelter}") { backStackEntry ->
                         val shelter = deserializeShelter(backStackEntry)
                         val factory = RemoteShelterViewModelFactory(applicationContext)
@@ -187,7 +280,8 @@ class MainActivity : ComponentActivity() {
     private fun deserializeUser(backStackEntry: NavBackStackEntry): UserDTO? {
         val userJson = backStackEntry.arguments?.getString("user")
         return try {
-            userJson?.let { Gson().fromJson(it, UserDTO::class.java) }
+            val decodedUserJson = userJson?.let { URLDecoder.decode(it, StandardCharsets.UTF_8.toString()) }
+            decodedUserJson?.let { Gson().fromJson(it, UserDTO::class.java) }
         } catch (e: Exception) {
             Log.e("Navigation", "Error deserializing UserDTO: ${e.message}", e)
             null
@@ -207,7 +301,8 @@ class MainActivity : ComponentActivity() {
     private fun deserializeAnimal(backStackEntry: NavBackStackEntry): AnimalDTO? {
         val animalJson = backStackEntry.arguments?.getString("animal")
         return try {
-            animalJson?.let { Gson().fromJson(it, AnimalDTO::class.java) }
+            val decodedAnimalJson = animalJson?.let { URLDecoder.decode(it, StandardCharsets.UTF_8.toString()) }
+            decodedAnimalJson?.let { Gson().fromJson(it, AnimalDTO::class.java) }
         } catch (e: Exception) {
             Log.e("Navigation", "Error deserializing AnimalDTO: ${e.message}", e)
             null
