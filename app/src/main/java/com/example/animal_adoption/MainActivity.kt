@@ -26,6 +26,7 @@ import com.example.animal_adoption.screens.ShelterLogin
 import com.example.animal_adoption.screens.ShelterRegister
 import com.example.animal_adoption.screens.ShelterProfile
 import com.example.animal_adoption.screens.ShelterUpdateAnimal
+import com.example.animal_adoption.screens.UserUpdateData
 import com.example.animal_adoption.screens.ShelterUpdateData
 import com.example.animal_adoption.screens.UserHome
 import com.example.animal_adoption.screens.UserLogin
@@ -93,6 +94,16 @@ class MainActivity : ComponentActivity() {
                         val user = deserializeUser(backStackEntry)
                         val factory = RemoteUserViewModelFactory(applicationContext)
                         UserConfiguration(
+                            navController = navController,
+                            remoteUserViewModel = viewModel(factory = factory),
+                            user = user
+                        )
+                    }
+
+                    composable("UserUpdateData/{user}") { backStackEntry ->
+                        val user = deserializeUser(backStackEntry)
+                        val factory = RemoteUserViewModelFactory(applicationContext)
+                        UserUpdateData(
                             navController = navController,
                             remoteUserViewModel = viewModel(factory = factory),
                             user = user

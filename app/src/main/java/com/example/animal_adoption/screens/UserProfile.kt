@@ -54,6 +54,8 @@ import com.example.animal_adoption.model.UserDTO
 import com.example.animal_adoption.screens.widgets.ShelterBottomBar
 import com.example.animal_adoption.screens.widgets.UserBottomBar
 import com.google.gson.Gson
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,7 +83,7 @@ fun UserProfile(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(150.dp)
-                            .background(MaterialTheme.colorScheme.primary),
+                            .background(Color(0xFFBBDEFB)),
                         contentAlignment = Alignment.Center
                     ) {
                         Box(
@@ -93,7 +95,7 @@ fun UserProfile(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.AccountCircle,
-                                contentDescription = "Shelter Logo",
+                                contentDescription = "User Logo",
                                 tint = MaterialTheme.colorScheme.onPrimary,
                                 modifier = Modifier.size(50.dp)
                             )
@@ -111,17 +113,19 @@ fun UserProfile(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Username: ${user?.username ?: "N/A"}",
+                        text = "Id: ${user?.id ?: "N/A"}",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
+                    //1
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+
                     ) {
                         Column(
                             modifier = Modifier.padding(16.dp)
@@ -133,14 +137,93 @@ fun UserProfile(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "This shelter is dedicated to providing care and finding homes for animals in need.",
+                                text = "Stay at home dog mom who loves pilates and matcha.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                            )
+                        }
+                    }
+                    //2
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0)) // Naranjito claro
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Birthday",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "21/10/2003.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    //3
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0)) // Naranjito claro
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = "City",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Barcelona.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    //4
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0)) // Naranjito claro
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Email",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "yourEmail@gmail.com",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.weight(1f))
+
+                    Spacer(modifier = Modifier.weight(0.5f))
                 }
 
                 // Icono y menú desplegable en la esquina superior derecha
@@ -169,7 +252,9 @@ fun UserProfile(
                             onClick = {
                                 Log.d("UserProfile", "Opción seleccionada: Editar perfil")
                                 showMenu = false
-                                // TODO: Añadir acción, e.g., navController.navigate("ShelterEditProfile")
+                                val userJson = Gson().toJson(user)
+                                val encodedUserJson = URLEncoder.encode(userJson, StandardCharsets.UTF_8.toString())
+                                navController.navigate("UserUpdateData/$encodedUserJson")
                             }
                         )
                         DropdownMenuItem(
