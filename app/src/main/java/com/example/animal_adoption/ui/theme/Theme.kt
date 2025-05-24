@@ -33,6 +33,8 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
+
+
 @Composable
 fun Animal_adoptionTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

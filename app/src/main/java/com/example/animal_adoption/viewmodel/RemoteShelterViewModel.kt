@@ -141,7 +141,7 @@ class RemoteShelterViewModel(context: Context) : ViewModel() {
     //ip del movil DavidSiles 10.0.22.100
     //ip del movil FioMoncayo 10.118.3.231
     /*val connection = Retrofit.Builder()
-        .baseUrl("http://10.0.22.100:8080/")
+        .baseUrl("http://10.0.2.2:8080/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()*/
 

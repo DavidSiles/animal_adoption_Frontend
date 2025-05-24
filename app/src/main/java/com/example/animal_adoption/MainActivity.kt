@@ -29,6 +29,7 @@ import com.example.animal_adoption.screens.ShelterLogin
 import com.example.animal_adoption.screens.ShelterRegister
 import com.example.animal_adoption.screens.ShelterProfile
 import com.example.animal_adoption.screens.ShelterUpdateAnimal
+import com.example.animal_adoption.screens.UserUpdateData
 import com.example.animal_adoption.screens.ShelterUpdateData
 import com.example.animal_adoption.screens.UserHome
 import com.example.animal_adoption.screens.UserLogin
@@ -150,6 +151,17 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
+
+                    composable("UserUpdateData/{user}") { backStackEntry ->
+                        val user = deserializeUser(backStackEntry)
+                        val factory = RemoteUserViewModelFactory(applicationContext)
+                        UserUpdateData(
+                            navController = navController,
+                            remoteUserViewModel = viewModel(factory = factory),
+                            user = user
+                        )
+                    }
+
                     // --- UserAnimalView Route (Mantiene 'user' y 'animal' pero decodifica internamente) ---
                     composable(route = "UserAnimalView/{animal}/{user}",
                         arguments = listOf(
@@ -181,6 +193,7 @@ class MainActivity : ComponentActivity() {
                         }
                         val shelterFactory = RemoteShelterViewModelFactory(applicationContext)
                         UserAnimalView(navController = navController, animal = animal, user = user, shelterViewModel = viewModel(factory = shelterFactory))
+
                     }
 
                     composable("ShelterLogin") {
