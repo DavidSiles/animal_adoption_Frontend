@@ -14,8 +14,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -93,8 +91,10 @@ interface RemoteShelterInterface {
     @GET("shelters/list")
     suspend fun getAllShelters(): List<ShelterDTO>
 
-    @PUT("shelters/{sheltername}")
-    suspend fun updateShelter(@Path("sheltername") sheltername: String, @Body shelter: ShelterDTO): ShelterDTO
+    @PUT("shelters/{shelterId}")
+    suspend fun updateShelter(@Path("shelterId") shelterId: Int,
+                              @Body updatedShelter: ShelterDTO
+    ): ShelterDTO
 
     @DELETE("shelters/{shelterId}")
     suspend fun deleteShelter(@Path("shelterId") shelterId: Int): Response<Unit>
@@ -210,11 +210,11 @@ class RemoteShelterViewModel(context: Context) : ViewModel() {
         }
     }
 
-    fun shelterRegister(sheltername: String, password: String, onSuccess: (ShelterDTO?) -> Unit) {
+    fun shelterRegister(sheltername: String, password: String, email: String, phone: String, onSuccess: (ShelterDTO?) -> Unit) {
         viewModelScope.launch {
             _registerMessageUiState.value = ShelterRegisterMessageUiState.Loading
             try {
-                val registerRequest = ShelterRegisterRequest(sheltername = sheltername, password = password)
+                val registerRequest = ShelterRegisterRequest(sheltername = sheltername, password = password, email = email, phone = phone)
                 val shelter = remoteService.shelterRegister(registerRequest)
                 _shelter.value = shelter
                 Log.d("ShelterRegister", "Shelter after registration: ${_shelter.value}")
@@ -318,7 +318,6 @@ class RemoteShelterViewModel(context: Context) : ViewModel() {
             }
         }
     }
-
     private val _shelterMap = MutableStateFlow<Map<Int, String>>(emptyMap())
     val shelterMap: StateFlow<Map<Int, String>> = _shelterMap
 
@@ -333,9 +332,7 @@ class RemoteShelterViewModel(context: Context) : ViewModel() {
         }
     }
 
-    fun updateShelter(
-        updatedShelter: ShelterDTO,
-        shelter: ShelterDTO,
+    fun updateShelter(updatedShelter: ShelterDTO, shelter: ShelterDTO,
         onSuccess: (ShelterDTO) -> Unit,
         onFailure: (String) -> Unit
     ) {
@@ -343,8 +340,8 @@ class RemoteShelterViewModel(context: Context) : ViewModel() {
             _updateShelterMessageUiState.value = UpdateShelterMessageUiState.Loading
             try {
                 val newUpdatedShelter = remoteService.updateShelter(
-                    sheltername = updatedShelter.sheltername,
-                    shelter = updatedShelter
+                    shelterId = shelter.id,
+                    updatedShelter = updatedShelter
                 )
                 _updateShelterMessageUiState.value = UpdateShelterMessageUiState.Success(newUpdatedShelter)
                 _shelter.value = newUpdatedShelter // Update the shelter state correctly

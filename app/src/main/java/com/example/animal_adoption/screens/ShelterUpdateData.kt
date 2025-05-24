@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -27,13 +28,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.transform.CircleCropTransformation
-import com.example.animal_adoption.model.FieldValidations
+import com.example.animal_adoption.screens.widgets.FieldValidations
 import com.example.animal_adoption.model.ShelterDTO
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
 import com.example.animal_adoption.viewmodel.UpdateShelterMessageUiState
@@ -66,6 +68,10 @@ fun ShelterUpdateData(
 
     // State for editable fields
     var sheltername by remember { mutableStateOf(shelter.sheltername) }
+    var email by remember { mutableStateOf(shelter.email ?: "") }
+    var phone by remember { mutableStateOf(shelter.phone ?: "") }
+    var emailError by remember { mutableStateOf<String?>(null) }
+    var phoneError by remember { mutableStateOf<String?>(null) }
     var shelternameError by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf("") }
     val updateShelterMessageUiState by remoteShelterViewModel.updateShelterMessageUiState.collectAsState()
@@ -129,6 +135,55 @@ fun ShelterUpdateData(
                 }
             )
 
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Name field
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                shape = RoundedCornerShape(12.dp),
+                isError = emailError != null,
+                supportingText = {
+                    emailError?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Name field
+            OutlinedTextField(
+                value = phone,
+                onValueChange = { phone = it },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                label = { Text("Number phone") },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                shape = RoundedCornerShape(12.dp),
+                isError = phoneError != null,
+                supportingText = {
+                    phoneError?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            )
+
             Spacer(modifier = Modifier.height(24.dp))
 
             // Update button
@@ -140,10 +195,20 @@ fun ShelterUpdateData(
                 onClick = {
 
                     shelternameError = FieldValidations.validateName(sheltername)
+                    emailError = FieldValidations.validateEmail(email)
+                    phoneError = FieldValidations.validatePhone(phone)
+                    if (emailError == null && email.isEmpty()){
+                        email = ""
+                    }
+                    if (phoneError == null && phone.isEmpty()){
+                        phone = ""
+                    }
                     val updatedShelterDTO = ShelterDTO(
                         id = shelter.id,
                         sheltername = sheltername,
-                        password = "" // Preserve existing password
+                        password = "",
+                        email = email,
+                        phone = phone
                     )
                     remoteShelterViewModel.updateShelter(
                         updatedShelter = updatedShelterDTO,

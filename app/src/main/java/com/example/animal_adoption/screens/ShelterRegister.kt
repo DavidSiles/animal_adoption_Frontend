@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.animal_adoption.R
-import com.example.animal_adoption.model.FieldValidations
+import com.example.animal_adoption.screens.widgets.FieldValidations
 import com.example.animal_adoption.viewmodel.NetworkModule.WithServiceInitialization
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
 import com.example.animal_adoption.viewmodel.ShelterRegisterMessageUiState
@@ -58,8 +58,12 @@ fun ShelterRegister(
     val registerMessageUiState by remoteShelterViewModel.registerMessageUiState.collectAsState()
     var sheltername by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
     var shelternameError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
+    var emailError by remember { mutableStateOf<String?>(null) }
+    var phoneError by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf("") }
     var serverError by remember { mutableStateOf<String?>(null) }
     var connectMessage by remember { mutableStateOf(false) }
@@ -67,7 +71,7 @@ fun ShelterRegister(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(25.dp),
             horizontalArrangement = Arrangement.Start
         ) {
             IconButton(onClick = {
@@ -157,24 +161,74 @@ fun ShelterRegister(
                 }
             )
 
+            OutlinedTextField(
+                value = email,
+                onValueChange = { newValue ->
+                    email = newValue
+                    emailError = FieldValidations.validateEmail(newValue)
+                },
+                label = { Text("Email") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
+                shape = RoundedCornerShape(12.dp),
+                isError = emailError != null,
+                supportingText = {
+                    emailError?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            )
+
+            OutlinedTextField(
+                value = phone,
+                onValueChange = { newValue ->
+                    phone = newValue
+                    phoneError = FieldValidations.validatePhone(newValue)
+                },
+                label = { Text("Phone") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
+                shape = RoundedCornerShape(12.dp),
+                isError = phoneError != null,
+                supportingText = {
+                    phoneError?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            )
+
             Button(
                 onClick = {
                     shelternameError = FieldValidations.validateName(sheltername)
                     passwordError = FieldValidations.validatePassword(password)
+                    emailError = FieldValidations.validateEmail(email)
+                    phoneError = FieldValidations.validatePhone(phone)
                     serverError = null
 
-                    if (shelternameError == null && passwordError == null) {
-                        remoteShelterViewModel.shelterLogin(sheltername, password) { shelter ->
-                            val shelterJson = Gson().toJson(shelter)
-                            navController.navigate("ShelterHome/$shelterJson")
-                        }
-                        connectMessage = true
+                    if (emailError == null && email.isEmpty()){
+                        email = ""
+                    }
+                    if (phoneError == null && phone.isEmpty()){
+                        phone = ""
                     }
                     when {
+
                         else -> {
                             remoteShelterViewModel.shelterRegister(
                                 sheltername,
-                                password
+                                password,
+                                email,
+                                phone
                             ) { shelter ->
                                 val shelterJson = Gson().toJson(shelter)
                                 navController.navigate("ShelterHome/$shelterJson")

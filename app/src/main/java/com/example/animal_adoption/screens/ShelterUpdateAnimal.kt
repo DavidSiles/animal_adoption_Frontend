@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.animal_adoption.model.AnimalDTO
-import com.example.animal_adoption.model.FieldValidations
+import com.example.animal_adoption.screens.widgets.FieldValidations
 import com.example.animal_adoption.model.ShelterDTO
 import com.example.animal_adoption.viewmodel.RemoteAnimalViewModel
 import com.example.animal_adoption.viewmodel.UpdateAnimalMessageUiState
