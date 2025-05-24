@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.transform.CircleCropTransformation
+import com.example.animal_adoption.model.FieldValidations
 import com.example.animal_adoption.model.ShelterDTO
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
 import com.example.animal_adoption.viewmodel.UpdateShelterMessageUiState
@@ -64,6 +66,7 @@ fun ShelterUpdateData(
 
     // State for editable fields
     var sheltername by remember { mutableStateOf(shelter.sheltername) }
+    var shelternameError by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf("") }
     val updateShelterMessageUiState by remoteShelterViewModel.updateShelterMessageUiState.collectAsState()
     val updatedShelter by remoteShelterViewModel.shelter.collectAsState()
@@ -109,7 +112,21 @@ fun ShelterUpdateData(
                 value = sheltername,
                 onValueChange = { sheltername = it },
                 label = { Text("Shelter Name") },
-                modifier = Modifier.fillMaxWidth()
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                shape = RoundedCornerShape(12.dp),
+                isError = shelternameError != null,
+                supportingText = {
+                    shelternameError?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -121,10 +138,12 @@ fun ShelterUpdateData(
                     .height(60.dp)
                     .padding(5.dp),
                 onClick = {
+
+                    shelternameError = FieldValidations.validateName(sheltername)
                     val updatedShelterDTO = ShelterDTO(
                         id = shelter.id,
                         sheltername = sheltername,
-                        password = shelter.password ?: "" // Preserve existing password
+                        password = "" // Preserve existing password
                     )
                     remoteShelterViewModel.updateShelter(
                         updatedShelter = updatedShelterDTO,

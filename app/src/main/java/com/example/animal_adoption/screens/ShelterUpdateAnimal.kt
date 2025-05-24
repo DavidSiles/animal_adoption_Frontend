@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -26,11 +28,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.animal_adoption.model.AnimalDTO
+import com.example.animal_adoption.model.FieldValidations
 import com.example.animal_adoption.model.ShelterDTO
 import com.example.animal_adoption.viewmodel.RemoteAnimalViewModel
 import com.example.animal_adoption.viewmodel.UpdateAnimalMessageUiState
@@ -65,6 +69,8 @@ fun ShelterUpdateAnimal(
     // State for editable fields
     var name by remember { mutableStateOf(animal.name) }
     var reiac by remember { mutableStateOf(animal.reiac.toString()) }
+    var reiacError by remember { mutableStateOf<String?>(null) }
+    var animalNameError by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf("") }
     val updateAnimalMessageUiState by remoteAnimalViewModel.updateAnimalMessageUiState.collectAsState()
 
@@ -109,7 +115,21 @@ fun ShelterUpdateAnimal(
                 value = name,
                 onValueChange = { name = it },
                 label = { Text("Animal Name") },
-                modifier = Modifier.fillMaxWidth()
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                shape = RoundedCornerShape(12.dp),
+                isError = animalNameError != null,
+                supportingText = {
+                    animalNameError?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -118,8 +138,23 @@ fun ShelterUpdateAnimal(
             OutlinedTextField(
                 value = reiac,
                 onValueChange = { reiac = it },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 label = { Text("REIAC") },
                 modifier = Modifier.fillMaxWidth()
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                isError = reiacError != null,
+                supportingText = {
+                    reiacError?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -131,29 +166,53 @@ fun ShelterUpdateAnimal(
                     .height(60.dp)
                     .padding(5.dp),
                 onClick = {
-                    val updatedAnimal = AnimalDTO(
-                        id = animal.id,
-                        name = name,
-                        reiac = reiac.toIntOrNull() ?: animal.reiac,
-                        shelterId = shelter.id
-                    )
-                    remoteAnimalViewModel.updateAnimal(
-                        updatedAnimal = updatedAnimal,
-                        onSuccess = { updatedAnimal ->
-                            // Handle success (e.g., navigate back)
-                            val shelterJson = Gson().toJson(shelter)
-                            val encodedShelterJson = URLEncoder.encode(shelterJson, StandardCharsets.UTF_8.toString())
-                            navController.navigate("ShelterListAnimals/$encodedShelterJson") {
-                                popUpTo("ShelterListAnimals/{shelter}") {
-                                    inclusive = false
+                    errorMessage = ""
+                    when {
+                        reiac.isEmpty() -> errorMessage = "Please enter a valid reiac"
+                        else -> {
+                            // Validar reiac
+                            val reiac = reiac.toIntOrNull()
+                            if (reiac == null) {
+                                errorMessage = "Reiac must be a valid number"
+                            } else {
+                                val reiacError = FieldValidations.validateReiac(reiac)
+                                if (reiacError != null) {
+                                    errorMessage = reiacError
+                                } else {
+                                    // Validar animalName
+                                    val nameError = FieldValidations.validateAnimalName(name)
+                                    if (nameError != null) {
+                                        errorMessage = nameError
+                                    } else {
+                                        val updatedAnimal = AnimalDTO(
+                                            id = animal.id,
+                                            name = name,
+                                            reiac = reiac,
+                                            shelterId = shelter.id
+                                        )
+                                        remoteAnimalViewModel.updateAnimal(
+                                            updatedAnimal = updatedAnimal,
+                                            onSuccess = { updatedAnimal ->
+                                                // Handle success (e.g., navigate back)
+                                                val shelterJson = Gson().toJson(shelter)
+                                                val encodedShelterJson = URLEncoder.encode(shelterJson, StandardCharsets.UTF_8.toString())
+                                                navController.navigate("ShelterListAnimals/$encodedShelterJson") {
+                                                    popUpTo("ShelterListAnimals/{shelter}") {
+                                                        inclusive = false
+                                                    }
+                                                    launchSingleTop = true
+                                                }
+                                            },
+                                            onFailure = { error ->
+                                                errorMessage = error
+                                            }
+                                        )
+                                    }
                                 }
-                                launchSingleTop = true
                             }
-                        },
-                        onFailure = { error ->
-                            errorMessage = error
                         }
-                    )
+                    }
+
                 }
             ) {
                 Text("Save Changes")

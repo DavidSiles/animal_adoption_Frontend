@@ -2,6 +2,7 @@ package com.example.animal_adoption.screens
 
 import android.R
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -32,6 +33,9 @@ fun ShelterProfile(
     navController: NavHostController,
     shelter: ShelterDTO?
 ) {
+    // Disable device back button
+    BackHandler(enabled = true) {}
+
     var showMenu by remember { mutableStateOf(false) }
 
     Scaffold(

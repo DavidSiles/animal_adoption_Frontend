@@ -200,12 +200,12 @@ class RemoteShelterViewModel(context: Context) : ViewModel() {
                     val errorShelter = errorResponse?.let { Gson().fromJson(it, ShelterDTO::class.java) }
                     errorShelter?.sheltername ?: "Invalid shelter name or password"
                 } else {
-                    "Failed to login: ${e.message}"
+                    "Failed to login"
                 }
                 _loginMessageUiState.value = ShelterLoginMessageUiState.Error(errorMessage)
             } catch (e: Exception) {
                 Log.e("ShelterLogin", "Error during login: ${e.message}", e)
-                _loginMessageUiState.value = ShelterLoginMessageUiState.Error("Failed to login: ${e.message}")
+                _loginMessageUiState.value = ShelterLoginMessageUiState.Error("Failed to login")
             }
         }
     }
@@ -228,12 +228,12 @@ class RemoteShelterViewModel(context: Context) : ViewModel() {
                     val errorShelter = errorResponse?.let { Gson().fromJson(it, ShelterDTO::class.java) }
                     errorShelter?.sheltername ?: "Shelter name already exists"
                 } else {
-                    "Failed to register: ${e.message}"
+                    "Failed to register"
                 }
                 _registerMessageUiState.value = ShelterRegisterMessageUiState.Error(errorMessage)
             } catch (e: Exception) {
                 Log.e("ShelterRegister", "Error during registration: ${e.message}", e)
-                _registerMessageUiState.value = ShelterRegisterMessageUiState.Error("Failed to register: ${e.message}")
+                _registerMessageUiState.value = ShelterRegisterMessageUiState.Error("Failed to register")
             }
         }
     }
@@ -256,13 +256,13 @@ class RemoteShelterViewModel(context: Context) : ViewModel() {
                     Log.d("GetShelterAnimals", "Error response: $errorResponse")
                     "Invalid shelter ID"
                 } else {
-                    "Failed to fetch animals: ${e.message}"
+                    "Failed to fetch animals"
                 }
                 _getShelterAnimalsListMessage.value = GetShelterAnimalsListMessageUiState.Error(errorMessage)
                 onFailure(errorMessage)
             } catch (e: Exception) {
                 Log.e("GetShelterAnimals", "Error fetching animals: ${e.message}", e)
-                val errorMessage = "Failed to fetch animals: ${e.message}"
+                val errorMessage = "Failed to fetch animals"
                 _getShelterAnimalsListMessage.value = GetShelterAnimalsListMessageUiState.Error(errorMessage)
                 onFailure(errorMessage)
             }
@@ -301,7 +301,7 @@ class RemoteShelterViewModel(context: Context) : ViewModel() {
                 _createNewAnimalMessageUiState.value = CreateNewAnimalMessageUiState.Error(errorMessage)
             } catch (e: Exception) {
                 Log.e("CreateAnimal", "Error during animal creation: ${e.message}", e)
-                _createNewAnimalMessageUiState.value = CreateNewAnimalMessageUiState.Error("Failed to create animal: ${e.message}")
+                _createNewAnimalMessageUiState.value = CreateNewAnimalMessageUiState.Error("Failed to create animal")
             }
         }
     }
@@ -354,14 +354,14 @@ class RemoteShelterViewModel(context: Context) : ViewModel() {
                 val errorMessage = when (e.code()) {
                     400 -> "Invalid shelter data"
                     401 -> "Unauthorized: Invalid credentials"
-                    404 -> "Shelter not found"
-                    else -> "Failed to update shelter: ${e.message}"
+                    404 -> "Shelter name already exist, try other"
+                    else -> "Failed to update shelter"
                 }
                 _updateShelterMessageUiState.value = UpdateShelterMessageUiState.Error(errorMessage)
                 onFailure(errorMessage)
             } catch (e: Exception) {
                 Log.e("UpdateShelter", "Error updating shelter: ${e.message}", e)
-                val errorMessage = "Failed to update shelter: ${e.message}"
+                val errorMessage = "Failed to update shelter"
                 _updateShelterMessageUiState.value = UpdateShelterMessageUiState.Error(errorMessage)
                 onFailure(errorMessage)
             }
@@ -384,7 +384,7 @@ class RemoteShelterViewModel(context: Context) : ViewModel() {
                     val errorMessage = when (response.code()) {
                         400 -> "Invalid shelter ID"
                         404 -> "Shelter not found"
-                        else -> "Failed to delete shelter: ${response.message()}"
+                        else -> "Failed to delete shelter"
                     }
                     Log.e("DeleteShelter", "HTTP error during deletion: ${response.message()}, Code: ${response.code()}")
                     _deleteShelterMessageUiState.value = DeleteShelterMessageUiState.Error(errorMessage)
@@ -392,7 +392,7 @@ class RemoteShelterViewModel(context: Context) : ViewModel() {
                 }
             } catch (e: Exception) {
                 Log.e("DeleteShelter", "Error during deletion: ${e.message}", e)
-                val errorMessage = "Failed to delete shelter: ${e.message}"
+                val errorMessage = "Failed to delete shelter"
                 _deleteShelterMessageUiState.value = DeleteShelterMessageUiState.Error(errorMessage)
                 onFailure(errorMessage)
             }

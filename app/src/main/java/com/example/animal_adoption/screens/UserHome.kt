@@ -1,5 +1,6 @@
 package com.example.animal_adoption.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -30,6 +32,9 @@ import com.example.animal_adoption.viewmodel.AnimalUiState
 import com.example.animal_adoption.viewmodel.RemoteAnimalViewModel
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
 import com.example.animal_adoption.viewmodel.RemoteUserViewModel
+import com.google.gson.Gson
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,6 +44,8 @@ fun UserHome(
     animalViewModel: RemoteAnimalViewModel,
     shelterViewModel: RemoteShelterViewModel
 ) {
+    // Disable device back button
+    BackHandler(enabled = true) {}
 
     val animalUiState by animalViewModel.animalUiState.collectAsState()
     val shelterMap by shelterViewModel.shelterMap.collectAsState(initial = emptyMap<Int, String>())
@@ -50,7 +57,7 @@ fun UserHome(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Welcome!") })
+            TopAppBar(title = { Text("Welcome, ${user?.username ?: "Usuario"}!") })
         },
         bottomBar = {
             UserBottomBar(navController = navController, user = user)
@@ -77,13 +84,16 @@ fun UserHome(
                                     .fillMaxWidth()
                                     .padding(vertical = 8.dp)
                                     .clickable {
-                                        // Navegar al detalle si tienes esa pantalla
+                                        // no entiendo qué estoy haciendo aquí dentro
+                                        val animalJson = URLEncoder.encode(Gson().toJson(animal), StandardCharsets.UTF_8.toString())
+                                        val userJson = URLEncoder.encode(Gson().toJson(user), StandardCharsets.UTF_8.toString())
+                                        navController.navigate("UserAnimalView/$animalJson/$userJson")
                                     }
                             ) {
                                 Column(modifier = Modifier.padding(16.dp)) {
-                                    Text("Nombre: ${animal.name}")
-                                    Text("REIAC: ${animal.reiac}")
-                                    Text("Refugio: ${shelterMap[animal.shelterId] ?: "Desconocido"}")
+                                    Text("Nombre: ${animal.name}", style = MaterialTheme.typography.titleMedium)
+                                    Text("REIAC: ${animal.reiac}", style = MaterialTheme.typography.bodyMedium)
+                                    Text("Refugio: ${shelterMap[animal.shelterId] ?: "Desconocido"}", style = MaterialTheme.typography.bodySmall)
                                 }
                             }
                         }

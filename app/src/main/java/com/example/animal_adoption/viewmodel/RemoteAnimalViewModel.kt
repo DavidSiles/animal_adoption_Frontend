@@ -181,7 +181,7 @@ class RemoteAnimalViewModel(context: Context) : ViewModel() {
                     val errorMessage = when (response.code()) {
                         400 -> "Invalid animal ID"
                         404 -> "Animal not found"
-                        else -> "Failed to delete animal: ${response.message()}"
+                        else -> "Failed to delete animal"
                     }
                     Log.e("DeleteAnimal", "HTTP error during deletion: ${response.message()}, Code: ${response.code()}")
                     _deleteAnimalMessageUiState.value = DeleteAnimalMessageUiState.Error(errorMessage)
@@ -189,7 +189,7 @@ class RemoteAnimalViewModel(context: Context) : ViewModel() {
                 }
             } catch (e: Exception) {
                 Log.e("DeleteAnimal", "Error during deletion: ${e.message}", e)
-                val errorMessage = "Failed to delete animal: ${e.message}"
+                val errorMessage = "Failed to delete animal"
                 _deleteAnimalMessageUiState.value = DeleteAnimalMessageUiState.Error(errorMessage)
                 onFailure(errorMessage)
             }
