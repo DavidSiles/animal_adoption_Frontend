@@ -33,7 +33,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.animal_adoption.model.FieldValidations
+import com.example.animal_adoption.screens.widgets.FieldValidations
 import com.example.animal_adoption.model.ShelterDTO
 import com.example.animal_adoption.viewmodel.CreateNewAnimalMessageUiState
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
