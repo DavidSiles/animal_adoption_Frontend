@@ -1,4 +1,3 @@
-// com.example.animal_adoption.viewmodel.RemoteAdoptionRequestViewModel.kt
 package com.example.animal_adoption.viewmodel
 
 import android.content.Context

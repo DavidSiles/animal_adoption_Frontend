@@ -1,9 +1,11 @@
 package com.example.animal_adoption.screens.widgets
 
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
@@ -15,23 +17,28 @@ import androidx.navigation.NavHostController
 import com.example.animal_adoption.model.ShelterDTO
 import com.example.animal_adoption.model.UserDTO
 import com.google.gson.Gson
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Composable
 fun UserBottomBar(
     navController: NavHostController,
     user: UserDTO?
 ) {
-    val userJson = Gson().toJson(user)
-    //val encodedUserJson = URLEncoder.encode(userJson, StandardCharsets.UTF_8.toString())
+    val userJson = user?.let {
+        URLEncoder.encode(Gson().toJson(it), StandardCharsets.UTF_8.toString())
+    }
+
     BottomAppBar {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
                 modifier = Modifier
-                    .padding(12.dp)
-                    .width(80.dp),
+                    .weight(1f)
+                    .padding(vertical = 4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ){
@@ -40,28 +47,58 @@ fun UserBottomBar(
                 }
                 Text(
                     text = "Home",
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Column(
                 modifier = Modifier
-                    .padding(12.dp)
-                    .width(80.dp),
+                    .weight(1f)
+                    .padding(vertical = 4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 IconButton(onClick = { navController.navigate("UserMessages/$userJson") }) {
-                    Icon(Icons.Default.Menu, contentDescription = "Messages")
+                    Icon(Icons.Default.Menu, contentDescription = "Animals")
                 }
                 Text(
                     text = "Animals",
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+
             Column(
                 modifier = Modifier
-                    .padding(12.dp)
-                    .width(80.dp),
+                    .weight(1f)
+                    .padding(vertical = 4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                IconButton(onClick = {
+                    if (user != null) {
+                        Log.d("UserBottomBar", "Navigating to UserAdoptionRequests for userId: ${user.id}")
+                        navController.navigate("UserAdoptionRequests/${user.id}") {
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    } else {
+                        Log.e("UserBottomBar", "User is null, cannot navigate to UserAdoptionRequests.")
+                    }
+                }) {
+                    Icon(Icons.Default.ListAlt, contentDescription = "My Requests") // Icono para solicitudes
+                }
+                Text(
+                    text = "My Requests",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(vertical = 4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -70,6 +107,7 @@ fun UserBottomBar(
                 }
                 Text(
                     text = "Profile",
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
