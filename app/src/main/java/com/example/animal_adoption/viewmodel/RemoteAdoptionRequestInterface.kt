@@ -3,7 +3,6 @@ package com.example.animal_adoption.viewmodel
 
 import com.example.animal_adoption.model.AdoptionRequestDTO
 import com.example.animal_adoption.model.CreateAdoptionRequestDTO
-import com.example.animal_adoption.model.UpdateAdoptionRequestStatusDTO
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -26,10 +25,10 @@ interface RemoteAdoptionRequestInterface {
     @GET("adoption_requests/users/{userId}")
     suspend fun getAdoptionRequestsByUserId(@Path("userId") userId: Int): List<AdoptionRequestDTO>
 
-    @PUT("adoption_requests/{id}/status")
+    @PUT("adoption_requests/{newStatus}")
     suspend fun updateAdoptionRequestStatus(
-        @Path("id") id: Int,
-        @Body newStatus: UpdateAdoptionRequestStatusDTO
+        @Path("newStatus") newStatus: String,
+        @Body requestId: Int
     ): AdoptionRequestDTO
 
     @DELETE("adoption_requests/{id}")

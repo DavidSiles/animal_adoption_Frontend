@@ -13,7 +13,3 @@ data class CreateAdoptionRequestDTO(
     val userId: Int,
     val animalId: Int
 )
-
-data class UpdateAdoptionRequestStatusDTO(
-    val newStatus: String
-)

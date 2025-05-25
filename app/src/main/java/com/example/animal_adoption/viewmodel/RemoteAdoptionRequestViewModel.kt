@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.animal_adoption.model.AdoptionRequestDTO
 import com.example.animal_adoption.model.CreateAdoptionRequestDTO
-import com.example.animal_adoption.model.UpdateAdoptionRequestStatusDTO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -159,8 +158,8 @@ class RemoteAdoptionRequestViewModel(context: Context) : ViewModel() {
         viewModelScope.launch {
             _updateAdoptionRequestStatusUiState.value = UpdateAdoptionRequestStatusUiState.Loading
             try {
-                val requestBody = UpdateAdoptionRequestStatusDTO(newStatus = newStatus)
-                val updatedRequest = adoptionRequestService.updateAdoptionRequestStatus(requestId, requestBody)
+                Log.d("AdoptionRequestVM", "Estado de solicitud $requestId actualizado a $newStatus")
+                val updatedRequest = adoptionRequestService.updateAdoptionRequestStatus(newStatus = newStatus, requestId = requestId)
                 _updateAdoptionRequestStatusUiState.value = UpdateAdoptionRequestStatusUiState.Success(updatedRequest)
                 Log.d("AdoptionRequestVM", "Estado de solicitud $requestId actualizado a $newStatus: $updatedRequest")
             } catch (e: HttpException) {
