@@ -39,13 +39,16 @@ import com.example.animal_adoption.screens.UserRegister
 import com.example.animal_adoption.viewmodel.RemoteAnimalViewModel
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
 import com.example.animal_adoption.viewmodel.RemoteUserViewModel
-
 import com.example.animal_adoption.screens.ShelterProfile
 import com.example.animal_adoption.screens.ShelterUpdateAnimal
 import com.example.animal_adoption.screens.UserConfiguration
 import com.example.animal_adoption.screens.ShelterUpdateData
 import com.example.animal_adoption.screens.UserAnimalView
 import com.example.animal_adoption.viewmodel.RemoteAdoptionViewModel
+import com.example.animal_adoption.viewmodel.RemoteAdoptionRequestViewModel
+import com.example.animal_adoption.screens.UserAdoptionRequestsScreen
+import com.example.animal_adoption.screens.ShelterAdoptionRequestsScreen
+
 
 import com.google.gson.Gson
 import java.net.URLDecoder
@@ -80,38 +83,66 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    composable("UserHome/{user}",
+                    composable("UserRegister") {
+                        val factory = RemoteUserViewModelFactory(applicationContext)
+                        UserRegister(
+                            navController = navController,
+                            remoteUserViewModel = viewModel(factory = factory)
+                        )
+                    }
+
+                    composable(
+                        route = "UserHome/{user}",
+                        arguments = listOf(navArgument("user") { type = NavType.StringType })
+                    ) { backStackEntry ->
+                        val user = deserializeUser(backStackEntry)
+                        val animalFactory = RemoteAnimalViewModelFactory(applicationContext)
+                        val shelterFactory = RemoteShelterViewModelFactory(applicationContext)
+                        UserHome(
+                            navController = navController,
+                            user = user,
+                            animalViewModel = viewModel(factory = animalFactory),
+                            shelterViewModel = viewModel(factory = shelterFactory)
+                        )
+                    }
+
+                    // --- MODIFICACIÓN: Pasar el nuevo VM de adopción a UserAnimalView ---
+                    composable(route = "UserAnimalView/{animal}/{user}",
                         arguments = listOf(
-                            navArgument("user") { type = NavType.StringType} //defino user explícitamente como string
+                            navArgument("animal") { type = NavType.StringType },
+                            navArgument("user") { type = NavType.StringType }
                         )
                     ) { backStackEntry ->
-                        val userString = backStackEntry.arguments?.getString("user")
-                        val user = userString?.let {
-                            try {
-                                // Decodificación necesaria porque estamos usando URLEncoder al navegar
-                                val decodedUserJson = URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
-                                Gson().fromJson(decodedUserJson, UserDTO::class.java)
-                            } catch (e: Exception) {
-                                Log.e("Navigation", "Error deserializing UserDTO for UserHome: ${e.message}", e)
-                                null
-                            }
-                        }
-                        if (user == null) {
-                            LaunchedEffect(Unit) {
-                                Log.e("NAV_DEBUG", "NavGraph - UserHome: UserDTO is null after deserialization. Redirecting to Login.")
-                                navController.navigate("UserLogin") {
-                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                                }
-                            }
-                        } else {
-                            val factoryShelter = RemoteShelterViewModelFactory(applicationContext)
-                            val factoryAnimal = RemoteAnimalViewModelFactory(applicationContext)
-                            UserHome(
+                        val animal = deserializeAnimal(backStackEntry)
+                        val user = deserializeUser(backStackEntry)
+
+                        val shelterFactory = RemoteShelterViewModelFactory(applicationContext)
+                        val adoptionRequestFactory = RemoteAdoptionRequestViewModelFactory(applicationContext) // Instancia la factory aquí
+
+                        UserAnimalView(
+                            navController = navController,
+                            animal = animal,
+                            user = user,
+                            shelterViewModel = viewModel(factory = shelterFactory),
+                            adoptionRequestViewModel = viewModel(factory = adoptionRequestFactory) // PASAR EL NUEVO VM
+                        )
+                    }
+
+                    composable(route = "UserAdoptionRequests/{userId}",
+                        arguments = listOf(navArgument("userId") { type = NavType.IntType })
+                    ) { backStackEntry ->
+                        val userId = backStackEntry.arguments?.getInt("userId")
+                        val adoptionRequestFactory = RemoteAdoptionRequestViewModelFactory(applicationContext)
+                        if (userId != null) {
+                            UserAdoptionRequestsScreen(
                                 navController = navController,
-                                user = user,
-                                animalViewModel = viewModel(factory = factoryAnimal),
-                                shelterViewModel = viewModel(factory = factoryShelter)
+                                userId = userId,
+                                adoptionRequestViewModel = viewModel(factory = adoptionRequestFactory)
                             )
+                        } else {
+                            LaunchedEffect(Unit) {
+                                navController.navigate("UserHome") // o a otra pantalla de error
+                            }
                         }
                     }
 
@@ -127,14 +158,6 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         UserProfile(navController = navController, user = user)
-                    }
-
-                    composable("UserRegister") {
-                        val factory = RemoteUserViewModelFactory(applicationContext)
-                        UserRegister(
-                            navController = navController,
-                            remoteUserViewModel = viewModel(factory = factory)
-                        )
                     }
 
                     composable("UserConfiguration/{user}") { backStackEntry ->
@@ -166,6 +189,7 @@ class MainActivity : ComponentActivity() {
                             user = user
                         )
                     }
+
 
                     composable("AdoptionSearchBarUser/{user}") { backStackEntry ->
                         val user = deserializeUser(backStackEntry)
@@ -220,6 +244,7 @@ class MainActivity : ComponentActivity() {
                         UserAnimalView(navController = navController, animal = animal, user = user, shelterViewModel = viewModel(factory = shelterFactory))
 
                     }
+
 
                     composable("ShelterLogin") {
                         val factory = RemoteShelterViewModelFactory(applicationContext)
@@ -310,6 +335,25 @@ class MainActivity : ComponentActivity() {
                             shelter = shelter
                         )
                     }
+
+                    composable(route = "ShelterAdoptionRequests/{shelterId}",
+                        arguments = listOf(navArgument("shelterId") { type = NavType.IntType })
+                    ) { backStackEntry ->
+                        val shelterId = backStackEntry.arguments?.getInt("shelterId")
+                        val adoptionRequestFactory = RemoteAdoptionRequestViewModelFactory(applicationContext)
+                        if (shelterId != null) {
+                            ShelterAdoptionRequestsScreen(
+                                navController = navController,
+                                shelterId = shelterId,
+                                adoptionRequestViewModel = viewModel(factory = adoptionRequestFactory)
+                            )
+                        } else {
+                            // Manejar error o redirigir
+                            LaunchedEffect(Unit) {
+                                navController.navigate("ShelterHome") // o a otra pantalla de error
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -378,11 +422,19 @@ class RemoteAnimalViewModelFactory(private val context: Context) : ViewModelProv
     }
 }
 
+
 class RemoteAdoptionViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(RemoteAdoptionViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return RemoteAdoptionViewModel(context) as T
+
+class RemoteAdoptionRequestViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(RemoteAdoptionRequestViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return RemoteAdoptionRequestViewModel(context) as T
+
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

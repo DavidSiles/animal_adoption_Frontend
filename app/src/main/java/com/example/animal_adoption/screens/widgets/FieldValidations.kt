@@ -1,6 +1,9 @@
-package com.example.animal_adoption.model
+package com.example.animal_adoption.screens.widgets
+
+import kotlin.text.contains
+
 //Clase publica para tomar validaciones de campos
-public  class FieldValidations {
+public class FieldValidations {
     companion object {
         // Validación para sheltername
         fun validateName(input: String): String? {
@@ -29,9 +32,35 @@ public  class FieldValidations {
             }
         }
 
+        // Validación para email
+        fun validateEmail(input: String): String? {
+            return when {
+                input.isBlank() -> null
+                input.length > 40 -> "Email must not exceed 40 characters"
+                input.contains(" ") -> "Email cannot contain spaces"
+                !input.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex()) ->
+                    "Wrong Email format; ex: email@gmail.com"
+
+                else -> null
+            }
+        }
+
+        // Validación Phone
+        fun validatePhone(input: String): String? {
+            return when {
+                input.isBlank() -> null
+                input.contains(" ") -> "Email cannot contain spaces"
+                !input.matches("^[0-9]+$".toRegex()) -> "Phone must contain only digits"
+                input.length < 3 -> "Number must have minimum 3 digits"
+                input.length > 12 -> "Number must have maximum 12 digits"
+                else -> null
+            }
+        }
+
         // Validación Reiac
         fun validateReiac(input: Int): String? {
             return when {
+                input.toString().contains(" ") -> "Email cannot contain spaces"
                 input.toInt() < 0 -> "Number can't be negative"
                 input.toString().length != 9 -> "Number must have exactly 9 digits"
                 else -> null

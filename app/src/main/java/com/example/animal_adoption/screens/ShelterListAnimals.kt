@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -121,10 +122,24 @@ fun ShelterListAnimals(
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(
-                            text = (uiState as GetShelterAnimalsListMessageUiState.Error).message,
-                            color = MaterialTheme.colorScheme.error
-                        )
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0))
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+                                Text(
+                                    text = (uiState as GetShelterAnimalsListMessageUiState.Error).message,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(onClick = {
                             remoteShelterViewModel.getShelterAnimals(
@@ -135,6 +150,8 @@ fun ShelterListAnimals(
                         }) {
                             Text("Retry")
                         }
+
+                        Spacer(modifier = Modifier.height(50.dp))
 
                         Card(
                             modifier = Modifier

@@ -77,5 +77,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
+    // Dependencia para los iconos extendidos de Material Design
+    implementation("androidx.compose.material:material-icons-extended:1.6.7")
 }

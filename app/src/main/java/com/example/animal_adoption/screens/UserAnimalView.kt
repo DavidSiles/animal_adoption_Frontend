@@ -1,6 +1,7 @@
 package com.example.animal_adoption.screens
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,12 +10,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,12 +32,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.animal_adoption.model.AnimalDTO
 import com.example.animal_adoption.model.UserDTO
+import com.example.animal_adoption.viewmodel.CreateAdoptionRequestUiState
+import com.example.animal_adoption.viewmodel.RemoteAdoptionRequestViewModel
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
 import com.google.gson.Gson
 import java.net.URLEncoder
@@ -46,8 +52,34 @@ fun UserAnimalView(
     navController: NavHostController,
     animal: AnimalDTO?,
     user: UserDTO?,
-    shelterViewModel: RemoteShelterViewModel
+    shelterViewModel: RemoteShelterViewModel,
+    adoptionRequestViewModel: RemoteAdoptionRequestViewModel
 ) {
+    val context = LocalContext.current
+    val createAdoptionRequestState by adoptionRequestViewModel.createAdoptionRequestUiState.collectAsState()
+
+    // Observar el estado de la solicitud de adopción
+    LaunchedEffect(createAdoptionRequestState) {
+        when (createAdoptionRequestState) {
+            is CreateAdoptionRequestUiState.Success -> {
+                val request = (createAdoptionRequestState as CreateAdoptionRequestUiState.Success).request
+                Toast.makeText(context, "Solicitud de adopción enviada con éxito. ID: ${request.id}", Toast.LENGTH_LONG).show()
+                adoptionRequestViewModel.resetCreateAdoptionRequestUiState()
+                // Opcional: Navegar a la pantalla de "Mis Solicitudes" después de enviar
+                // user?.id?.let { navController.navigate("UserAdoptionRequests/$it") }
+            }
+            is CreateAdoptionRequestUiState.Error -> {
+                val message = (createAdoptionRequestState as CreateAdoptionRequestUiState.Error).message
+                Toast.makeText(context, "Error al enviar solicitud: $message", Toast.LENGTH_LONG).show()
+                adoptionRequestViewModel.resetCreateAdoptionRequestUiState()
+            }
+            CreateAdoptionRequestUiState.Loading -> {
+                // El botón mostrará un indicador de carga
+            }
+            CreateAdoptionRequestUiState.Idle -> { /* No hacer nada en estado inicial/idle */ }
+        }
+    }
+
     if (animal == null || user == null) {
         Column(
             modifier = Modifier
@@ -83,9 +115,8 @@ fun UserAnimalView(
                         val userJson = Gson().toJson(user)
                         val encodedUserJson = URLEncoder.encode(userJson, StandardCharsets.UTF_8.toString())
                         navController.navigate("UserHome/$encodedUserJson") {
-                            // Limpia el back stack hasta UserHome para evitar múltiples instancias
                             popUpTo("UserHome/{encodedUserJson}") {
-                                inclusive = true // Incluye UserHome para limpiar todo detrás si es necesario
+                                inclusive = true
                             }
                             launchSingleTop = true
                         }
@@ -112,26 +143,28 @@ fun UserAnimalView(
                         .height(60.dp)
                         .padding(horizontal = 16.dp, vertical = 8.dp), // Un poco de padding horizontal
                     onClick = {
-                        // **Aquí iría la lógica para iniciar el proceso de adopción.**
-                        // Por ejemplo, podrías:
-                        // 1. Mostrar un diálogo de confirmación.
-                        // 2. Navegar a una pantalla de formulario de adopción (ej: "AdoptAnimalForm").
-                        // 3. Llamar a un metodo en un ViewModel para registrar el interés de adopción.
                         Log.d("UserAnimalView", "Botón Adoptar presionado para ${animal.name}")
-                        // Ejemplo: Si quieres mostrar un diálogo simple para confirmar:
-                        // showAdoptionConfirmationDialog = true // Necesitarías un `remember { mutableStateOf(false) }` para esto.
-                        // O navegar a un formulario de adopción:
-                        // val animalJson = URLEncoder.encode(Gson().toJson(animal), StandardCharsets.UTF_8.toString())
-                        // val userJson = URLEncoder.encode(Gson().toJson(user), StandardCharsets.UTF_8.toString())
-                        // navController.navigate("AdoptAnimalForm/$animalJson/$userJson")
+                        if (user != null && animal != null) {
+                            adoptionRequestViewModel.createAdoptionRequest(
+                                userId = user.id,
+                                animalId = animal.id
+                            )
+                        } else {
+                            Toast.makeText(context, "Datos de usuario o animal no disponibles para la solicitud.", Toast.LENGTH_SHORT).show()
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF4285F4),
                         contentColor = Color.White
                     ),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    enabled = createAdoptionRequestState !is CreateAdoptionRequestUiState.Loading
                 ) {
-                    Text("Adoptar", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    if (createAdoptionRequestState is CreateAdoptionRequestUiState.Loading) {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
+                    } else {
+                        Text("Adoptar", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }
