@@ -23,7 +23,7 @@ interface RemoteAdoptionRequestInterface {
     @GET("adoption_requests/shelter/{shelterId}")
     suspend fun getAdoptionRequestsByShelterId(@Path("shelterId") shelterId: Int): List<AdoptionRequestDTO>
 
-    @GET("adoption_requests/user/{userId}")
+    @GET("adoption_requests/users/{userId}")
     suspend fun getAdoptionRequestsByUserId(@Path("userId") userId: Int): List<AdoptionRequestDTO>
 
     @PUT("adoption_requests/{id}/status")
