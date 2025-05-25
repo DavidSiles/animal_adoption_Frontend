@@ -428,6 +428,11 @@ class RemoteAdoptionViewModelFactory(private val context: Context) : ViewModelPr
         if (modelClass.isAssignableFrom(RemoteAdoptionViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return RemoteAdoptionViewModel(context) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
 
 class RemoteAdoptionRequestViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
