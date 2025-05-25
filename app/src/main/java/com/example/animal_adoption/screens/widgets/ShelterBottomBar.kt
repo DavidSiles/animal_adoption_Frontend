@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.BottomAppBar
@@ -74,6 +75,32 @@ fun ShelterBottomBar(
                 }
                 Text(
                     text = "Animals",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(vertical = 4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                IconButton(onClick = {
+                    if (shelter != null) {
+                        Log.d("ShelterBottomBar", "Navigating to ShelterAdoptionRequests for userId: ${shelter.id}")
+                        navController.navigate("ShelterAdoptionRequests/${shelter.id}") {
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    } else {
+                        Log.e("ShelterBottomBar", "Shelter is null, cannot navigate to ShelterAdoptionRequests.")
+                    }
+                }) {
+                    Icon(Icons.Default.ListAlt, contentDescription = "My Requests") // Icono para solicitudes
+                }
+                Text(
+                    text = "My Requests",
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
