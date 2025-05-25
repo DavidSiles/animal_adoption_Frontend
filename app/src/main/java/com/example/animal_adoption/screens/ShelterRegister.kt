@@ -209,32 +209,30 @@ fun ShelterRegister(
 
             Button(
                 onClick = {
+                    // Validate all fields
                     shelternameError = FieldValidations.validateName(sheltername)
                     passwordError = FieldValidations.validatePassword(password)
                     emailError = FieldValidations.validateEmail(email)
                     phoneError = FieldValidations.validatePhone(phone)
                     serverError = null
 
-                    if (emailError == null && email.isEmpty()){
-                        email = ""
-                    }
-                    if (phoneError == null && phone.isEmpty()){
-                        phone = ""
-                    }
-                    when {
+                    // Check if all required fields are valid
+                    if (shelternameError == null && passwordError == null && emailError == null && phoneError == null) {
+                        // If email or phone is empty, set to empty string
+                        val finalEmail = if (email.isEmpty()) "" else email
+                        val finalPhone = if (phone.isEmpty()) "" else phone
 
-                        else -> {
-                            remoteShelterViewModel.shelterRegister(
-                                sheltername,
-                                password,
-                                email,
-                                phone
-                            ) { shelter ->
-                                val shelterJson = Gson().toJson(shelter)
-                                navController.navigate("ShelterHome/$shelterJson")
-                            }
-                            connectMessage = true
+                        // Proceed with registration
+                        remoteShelterViewModel.shelterRegister(
+                            sheltername,
+                            password,
+                            finalEmail,
+                            finalPhone
+                        ) { shelter ->
+                            val shelterJson = Gson().toJson(shelter)
+                            navController.navigate("ShelterHome/$shelterJson")
                         }
+                        connectMessage = true
                     }
                 },
                 modifier = Modifier

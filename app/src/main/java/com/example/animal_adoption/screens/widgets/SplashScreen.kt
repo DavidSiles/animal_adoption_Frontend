@@ -82,16 +82,29 @@ fun SplashScreen(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.padding(16.dp)
         ) {
-            // Logo con animación de escala
-            Image(
-                painter = painterResource(R.drawable.logotuons2),
-                contentDescription = "App Logo",
+            // Elemento decorativo (opcional, inspirado en apps de citas)
+            Box(
                 modifier = Modifier
-                    .size(150.dp)
-                    .scale(scale.value)
+                    .size(300.dp)
+                    .offset(y = (-100).dp)
+                    .background(
+                        color = Color.White.copy(alpha = 0.1f),
+                        shape = CircleShape
+                    )
                     .alpha(alpha.value),
-                contentScale = ContentScale.Fit
-            )
+                contentAlignment = Alignment.Center // Center the content inside the Box
+            ) {
+                // Logo con animación de escala
+                Image(
+                    painter = painterResource(R.drawable.logotuons2),
+                    contentDescription = "App Logo",
+                    modifier = Modifier
+                        .size(200.dp)
+                        .scale(scale.value)
+                        .alpha(alpha.value),
+                    contentScale = ContentScale.Fit
+                )
+            }
 
             // Texto de la aplicación con estilo moderno
             Text(
@@ -132,17 +145,7 @@ fun SplashScreen(
             )
         }
 
-        // Elemento decorativo (opcional, inspirado en apps de citas)
-        Box(
-            modifier = Modifier
-                .size(300.dp)
-                .offset(y = (-200).dp)
-                .background(
-                    color = Color.White.copy(alpha = 0.1f),
-                    shape = CircleShape
-                )
-                .alpha(alpha.value)
-        )
+
     }
 }
 
