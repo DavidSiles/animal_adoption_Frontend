@@ -58,9 +58,11 @@ fun UserBottomBar(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                IconButton(onClick = { navController.navigate("UserMessages/$userJson") }) {
-                    Icon(Icons.Default.Menu, contentDescription = "Animals")
+
+                IconButton(onClick = { navController.navigate("AdoptionSearchBarUser/$userJson") }) {
+                    Icon(Icons.Default.Menu, contentDescription = "SearchBar")
                 }
+                
                 Text(
                     text = "Animals",
                     style = MaterialTheme.typography.labelSmall,
