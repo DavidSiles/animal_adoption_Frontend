@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.animal_adoption.R
 import com.example.animal_adoption.viewmodel.NetworkModule
+import com.example.animal_adoption.viewmodel.RemoteAdoptionInterface
+import com.example.animal_adoption.viewmodel.RemoteAdoptionViewModel
 import com.example.animal_adoption.viewmodel.RemoteAnimalViewModel
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
 import com.example.animal_adoption.viewmodel.RemoteUserViewModel
@@ -33,6 +35,7 @@ val Poppins = FontFamily.Default
 @Composable
 fun FirstScreen(
     navController: NavHostController,
+    remoteAdoptionViewModel: RemoteAdoptionViewModel,
     remoteUserViewModel: RemoteUserViewModel,
     remoteShelterViewModel: RemoteShelterViewModel,
     remoteAnimalViewModel: RemoteAnimalViewModel
@@ -50,12 +53,13 @@ fun FirstScreen(
     }
 
     // Collect initialization states for all ViewModels
+    val adoptionServiceInitialized by remoteAdoptionViewModel.isServiceInitialized.collectAsState(initial = false)
     val userServiceInitialized by remoteUserViewModel.isServiceInitialized.collectAsState(initial = false)
     val shelterServiceInitialized by remoteShelterViewModel.isServiceInitialized.collectAsState(initial = false)
     val animalServiceInitialized by remoteAnimalViewModel.isServiceInitialized.collectAsState(initial = false)
 
     // Combine initialization states
-    val allServicesInitialized = userServiceInitialized && shelterServiceInitialized && animalServiceInitialized
+    val allServicesInitialized = userServiceInitialized && shelterServiceInitialized && animalServiceInitialized && adoptionServiceInitialized
 
     NetworkModule.WithServiceInitialization(
         isServiceInitialized = allServicesInitialized,

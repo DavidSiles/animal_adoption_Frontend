@@ -33,16 +33,19 @@ import com.example.animal_adoption.screens.UserUpdateData
 import com.example.animal_adoption.screens.ShelterUpdateData
 import com.example.animal_adoption.screens.UserHome
 import com.example.animal_adoption.screens.UserLogin
+import com.example.animal_adoption.screens.AdoptionSearchBar
 import com.example.animal_adoption.screens.UserProfile
 import com.example.animal_adoption.screens.UserRegister
 import com.example.animal_adoption.viewmodel.RemoteAnimalViewModel
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
 import com.example.animal_adoption.viewmodel.RemoteUserViewModel
+
 import com.example.animal_adoption.screens.ShelterProfile
 import com.example.animal_adoption.screens.ShelterUpdateAnimal
 import com.example.animal_adoption.screens.UserConfiguration
 import com.example.animal_adoption.screens.ShelterUpdateData
 import com.example.animal_adoption.screens.UserAnimalView
+import com.example.animal_adoption.viewmodel.RemoteAdoptionViewModel
 
 import com.google.gson.Gson
 import java.net.URLDecoder
@@ -56,11 +59,13 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 NavHost(navController = navController, startDestination = "FirstScreen") {
                     composable("FirstScreen") {
+                        val adoptionFactory = RemoteAdoptionViewModelFactory(applicationContext)
                         val userFactory = RemoteUserViewModelFactory(applicationContext)
                         val shelterFactory = RemoteShelterViewModelFactory(applicationContext)
                         val animalFactory = RemoteAnimalViewModelFactory(applicationContext)
                         FirstScreen(
                             navController = navController,
+                            remoteAdoptionViewModel = viewModel (factory = adoptionFactory),
                             remoteUserViewModel = viewModel(factory = userFactory),
                             remoteShelterViewModel = viewModel(factory = shelterFactory),
                             remoteAnimalViewModel = viewModel(factory = animalFactory)
@@ -159,6 +164,26 @@ class MainActivity : ComponentActivity() {
                             navController = navController,
                             remoteUserViewModel = viewModel(factory = factory),
                             user = user
+                        )
+                    }
+
+                    composable("AdoptionSearchBarUser/{user}") { backStackEntry ->
+                        val user = deserializeUser(backStackEntry)
+                        val factory = RemoteAdoptionViewModelFactory(applicationContext)
+                        AdoptionSearchBar(
+                            navController = navController,
+                            viewModel = viewModel(factory = factory),
+                            user = user
+                        )
+                    }
+
+                    composable("AdoptionSearchBarShelter/{shelter}") { backStackEntry ->
+                        val shelter = deserializeShelter(backStackEntry)
+                        val factory = RemoteAdoptionViewModelFactory(applicationContext)
+                        AdoptionSearchBar(
+                            navController = navController,
+                            viewModel = viewModel(factory = factory),
+                            shelter = shelter
                         )
                     }
 
@@ -348,6 +373,16 @@ class RemoteAnimalViewModelFactory(private val context: Context) : ViewModelProv
         if (modelClass.isAssignableFrom(RemoteAnimalViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return RemoteAnimalViewModel(context) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+class RemoteAdoptionViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(RemoteAdoptionViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return RemoteAdoptionViewModel(context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
