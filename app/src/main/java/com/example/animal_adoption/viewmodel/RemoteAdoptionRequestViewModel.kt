@@ -124,6 +124,7 @@ class RemoteAdoptionRequestViewModel(context: Context) : ViewModel() {
         viewModelScope.launch {
             _adoptionRequestUiState.value = AdoptionRequestUiState.Loading
             try {
+                Log.d("AdoptionRequestVM", "Solicitudes para refugio $shelterId")
                 val requests = adoptionRequestService.getAdoptionRequestsByShelterId(shelterId)
                 _adoptionRequestUiState.value = AdoptionRequestUiState.Success(requests)
                 Log.d("AdoptionRequestVM", "Solicitudes para refugio $shelterId: $requests")
