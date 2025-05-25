@@ -140,7 +140,10 @@ fun ShelterUpdateData(
             // Name field
             OutlinedTextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = { newValue ->
+                    email = newValue
+                    emailError = FieldValidations.validateEmail(email)
+                },
                 label = { Text("Email") },
                 singleLine = true,
                 modifier = Modifier
@@ -164,7 +167,10 @@ fun ShelterUpdateData(
             // Name field
             OutlinedTextField(
                 value = phone,
-                onValueChange = { phone = it },
+                onValueChange = { newValue ->
+                    phone = newValue
+                    phoneError = FieldValidations.validatePhone(newValue)
+                },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 label = { Text("Number phone") },
                 singleLine = true,
@@ -203,31 +209,38 @@ fun ShelterUpdateData(
                     if (phoneError == null && phone.isEmpty()){
                         phone = ""
                     }
-                    val updatedShelterDTO = ShelterDTO(
-                        id = shelter.id,
-                        sheltername = sheltername,
-                        password = "",
-                        email = email,
-                        phone = phone
-                    )
-                    remoteShelterViewModel.updateShelter(
-                        updatedShelter = updatedShelterDTO,
-                        shelter = shelter,
-                        onSuccess = { newUpdatedShelter ->
-                            sheltername = newUpdatedShelter.sheltername // Update local state
-                            val shelterJson = Gson().toJson(newUpdatedShelter)
-                            val encodedShelterJson = URLEncoder.encode(shelterJson, StandardCharsets.UTF_8.toString())
-                            navController.navigate("ShelterProfile/$encodedShelterJson") {
-                                popUpTo("ShelterProfile/{shelter}") {
-                                    inclusive = false
+                    // Check if all required fields are valid
+                    if (shelternameError == null && emailError == null && phoneError == null) {
+                        // If email or phone is empty, set to empty string
+                        val finalEmail = if (email.isEmpty()) "" else email
+                        val finalPhone = if (phone.isEmpty()) "" else phone
+                        val updatedShelterDTO = ShelterDTO(
+                            id = shelter.id,
+                            sheltername = sheltername,
+                            password = "",
+                            email = finalEmail,
+                            phone = finalPhone
+                        )
+
+                        remoteShelterViewModel.updateShelter(
+                            updatedShelter = updatedShelterDTO,
+                            shelter = shelter,
+                            onSuccess = { newUpdatedShelter ->
+                                sheltername = newUpdatedShelter.sheltername // Update local state
+                                val shelterJson = Gson().toJson(newUpdatedShelter)
+                                val encodedShelterJson = URLEncoder.encode(shelterJson, StandardCharsets.UTF_8.toString())
+                                navController.navigate("ShelterProfile/$encodedShelterJson") {
+                                    popUpTo("ShelterProfile/{shelter}") {
+                                        inclusive = false
+                                    }
+                                    launchSingleTop = true
                                 }
-                                launchSingleTop = true
+                            },
+                            onFailure = { error ->
+                                errorMessage = error
                             }
-                        },
-                        onFailure = { error ->
-                            errorMessage = error
-                        }
-                    )
+                        )
+                    }
                 }
             ) {
                 Text("Save Changes")

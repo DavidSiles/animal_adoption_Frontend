@@ -254,9 +254,9 @@ class RemoteShelterViewModel(context: Context) : ViewModel() {
                 val errorMessage = if (e.code() == 400) {
                     val errorResponse = e.response()?.errorBody()?.string()
                     Log.d("GetShelterAnimals", "Error response: $errorResponse")
-                    "Invalid shelter ID"
+                    "Invalid shelter data"
                 } else {
-                    "Failed to fetch animals"
+                    "You don't have animals yet in your account \nTry to add one"
                 }
                 _getShelterAnimalsListMessage.value = GetShelterAnimalsListMessageUiState.Error(errorMessage)
                 onFailure(errorMessage)
