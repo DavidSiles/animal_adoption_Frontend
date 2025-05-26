@@ -106,7 +106,6 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    // --- MODIFICACIÓN: Pasar el nuevo VM de adopción a UserAnimalView ---
                     composable(route = "UserAnimalView/{animal}/{user}",
                         arguments = listOf(
                             navArgument("animal") { type = NavType.StringType },
@@ -210,41 +209,6 @@ class MainActivity : ComponentActivity() {
                             shelter = shelter
                         )
                     }
-
-                    // --- UserAnimalView Route (Mantiene 'user' y 'animal' pero decodifica internamente) ---
-                    composable(route = "UserAnimalView/{animal}/{user}",
-                        arguments = listOf(
-                            navArgument("animal") { type = NavType.StringType },
-                            navArgument("user") { type = NavType.StringType }
-                        )
-                    ) { backStackEntry ->
-                        val animalString = backStackEntry.arguments?.getString("animal")
-                        val userString = backStackEntry.arguments?.getString("user")
-
-                        val animal = animalString?.let {
-                            try {
-                                val decodedAnimalJson = URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
-                                Gson().fromJson(decodedAnimalJson, AnimalDTO::class.java)
-                            } catch (e: Exception) {
-                                Log.e("Navigation", "Error deserializing AnimalDTO for UserAnimalView: ${e.message}", e)
-                                null
-                            }
-                        }
-
-                        val user = userString?.let {
-                            try {
-                                val decodedUserJson = URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
-                                Gson().fromJson(decodedUserJson, UserDTO::class.java)
-                            } catch (e: Exception) {
-                                Log.e("Navigation", "Error deserializing UserDTO for UserAnimalView: ${e.message}", e)
-                                null
-                            }
-                        }
-                        val shelterFactory = RemoteShelterViewModelFactory(applicationContext)
-                        UserAnimalView(navController = navController, animal = animal, user = user, shelterViewModel = viewModel(factory = shelterFactory))
-
-                    }
-
 
                     composable("ShelterLogin") {
                         val factory = RemoteShelterViewModelFactory(applicationContext)
