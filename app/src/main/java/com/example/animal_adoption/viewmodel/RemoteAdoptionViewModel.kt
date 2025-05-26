@@ -41,19 +41,12 @@ interface RemoteAdoptionInterface {
 
 }
 
-    sealed interface AdoptionRequestUiState {
-        data class Success(val requests: List<AdoptionRequestDTO>) : AdoptionRequestUiState
-        object Error : AdoptionRequestUiState
-        object Loading : AdoptionRequestUiState
-    }
     sealed interface AnimalSearchUiState {
         data class Success(val animals: List<AnimalDTO>) : AnimalSearchUiState
         object Error : AnimalSearchUiState
         object Loading : AnimalSearchUiState
     }
 
-
-    //implementacion
     class RemoteAdoptionViewModel(context: Context) : ViewModel() {
 
         private val _adoptionUiState = MutableStateFlow<AdoptionRequestUiState>(AdoptionRequestUiState.Loading)
