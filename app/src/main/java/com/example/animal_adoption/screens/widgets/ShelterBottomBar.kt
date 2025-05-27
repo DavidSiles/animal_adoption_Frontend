@@ -56,7 +56,7 @@ fun ShelterBottomBar(
     val items = listOf(
         ShelterBottomNavItem("Home", Icons.Default.Home, "ShelterHome/$shelterJson"),
         ShelterBottomNavItem("Animals", Icons.AutoMirrored.Filled.List, "ShelterListAnimals/$shelterJson"), // Changed icon to List
-        ShelterBottomNavItem("Requests", Icons.Default.Pets, "ShelterAdoptionRequests/${shelter?.id}"), // Changed label to "Requests"
+        ShelterBottomNavItem("Requests", Icons.Default.Pets, "ShelterAdoptionRequests/$shelterJson"), // Changed label to "Requests"
         ShelterBottomNavItem("Profile", Icons.Default.AccountCircle, "ShelterProfile/$shelterJson")
     )
 

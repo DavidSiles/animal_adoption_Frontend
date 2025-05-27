@@ -44,7 +44,7 @@ fun UserBottomBar(
     val items = listOf(
         UserBottomNavItem("Home", Icons.Default.Home, "UserHome/$userJson"),
         UserBottomNavItem("Animals", Icons.Default.Search, "AdoptionSearchBarUser/$userJson"), // Usamos Icons.Default.Search para "Animals"
-        UserBottomNavItem("My Requests", Icons.Default.Pets, "UserAdoptionRequests/${user?.id}"),
+        UserBottomNavItem("My Requests", Icons.Default.Pets, "UserAdoptionRequests/$userJson"),
         UserBottomNavItem("Profile", Icons.Default.AccountCircle, "UserProfile/$userJson")
     )
 
