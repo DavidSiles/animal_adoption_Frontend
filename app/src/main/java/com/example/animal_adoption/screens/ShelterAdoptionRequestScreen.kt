@@ -10,13 +10,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.animal_adoption.viewmodel.RemoteAdoptionRequestViewModel
 import com.example.animal_adoption.viewmodel.AdoptionRequestUiState
 import com.example.animal_adoption.viewmodel.UpdateAdoptionRequestStatusUiState
-import android.util.Log // Para logs
+import android.util.Log
+
+val TuonsBlue = Color(0xFF4285F4)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,7 +35,8 @@ fun ShelterAdoptionRequestsScreen(
     LaunchedEffect(shelterId, updateStatusState) {
         if (updateStatusState is UpdateAdoptionRequestStatusUiState.Success ||
             updateStatusState is UpdateAdoptionRequestStatusUiState.Error ||
-            updateStatusState is UpdateAdoptionRequestStatusUiState.Idle) {
+            updateStatusState is UpdateAdoptionRequestStatusUiState.Idle
+        ) {
             Log.d("ShelterAdoptionRequests", "Recargando solicitudes para refugio ID: $shelterId")
             adoptionRequestViewModel.getAdoptionRequestsByShelterId(shelterId)
         }
@@ -42,27 +46,27 @@ fun ShelterAdoptionRequestsScreen(
         when (updateStatusState) {
             is UpdateAdoptionRequestStatusUiState.Success -> {
                 Toast.makeText(context, "Estado de solicitud actualizado con éxito.", Toast.LENGTH_SHORT).show()
-                adoptionRequestViewModel.resetUpdateAdoptionRequestStatusUiState() // Resetear el estado
+                adoptionRequestViewModel.resetUpdateAdoptionRequestStatusUiState()
             }
             is UpdateAdoptionRequestStatusUiState.Error -> {
                 val message = (updateStatusState as UpdateAdoptionRequestStatusUiState.Error).message
                 Toast.makeText(context, "Error al actualizar estado: $message", Toast.LENGTH_LONG).show()
-                adoptionRequestViewModel.resetUpdateAdoptionRequestStatusUiState() // Resetear el estado
+                adoptionRequestViewModel.resetUpdateAdoptionRequestStatusUiState()
             }
-            UpdateAdoptionRequestStatusUiState.Loading -> { /* Se gestiona en el botón */ }
-            UpdateAdoptionRequestStatusUiState.Idle -> { /* Estado inicial */ }
+            else -> {}
         }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Solicitudes de Adopción (Refugio)") },
+                title = { Text("Adoption requests") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = TuonsBlue, titleContentColor = Color.White)
             )
         }
     ) { paddingValues ->
@@ -72,17 +76,24 @@ fun ShelterAdoptionRequestsScreen(
                 .padding(paddingValues)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
         ) {
             when (uiState) {
                 is AdoptionRequestUiState.Loading -> {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(color = TuonsBlue)
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text("Cargando solicitudes...")
                 }
                 is AdoptionRequestUiState.Error -> {
-                    Text("Error al cargar las solicitudes de adopción del refugio. Inténtalo de nuevo.", color = MaterialTheme.colorScheme.error)
-                    Button(onClick = { adoptionRequestViewModel.getAdoptionRequestsByShelterId(shelterId) }) {
-                        Text("Reintentar")
+                    Text(
+                        "Error al cargar las solicitudes de adopción del refugio. Inténtalo de nuevo.",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = { adoptionRequestViewModel.getAdoptionRequestsByShelterId(shelterId) },
+                        colors = ButtonDefaults.buttonColors(containerColor = TuonsBlue)
+                    ) {
+                        Text("Reintentar", color = Color.White)
                     }
                 }
                 is AdoptionRequestUiState.Success -> {
@@ -96,33 +107,42 @@ fun ShelterAdoptionRequestsScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(vertical = 8.dp),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                                    colors = CardDefaults.cardColors(containerColor = Color.White)
                                 ) {
                                     Column(modifier = Modifier.padding(16.dp)) {
-                                        Text("ID Solicitud: ${request.id}", style = MaterialTheme.typography.titleMedium)
-                                        Text("ID Usuario: ${request.userId}", style = MaterialTheme.typography.bodyMedium)
-                                        Text("ID Animal: ${request.animalId}", style = MaterialTheme.typography.bodyMedium)
+                                        Text(
+                                            "Solicitud #${request.id}",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            color = TuonsBlue
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text("Usuario: ${request.userId}", style = MaterialTheme.typography.bodyMedium)
+                                        Text("Animal: ${request.animalId}", style = MaterialTheme.typography.bodyMedium)
                                         Text("Estado: ${request.status}", style = MaterialTheme.typography.bodyMedium)
                                         Text("Fecha: ${request.requestDate}", style = MaterialTheme.typography.bodySmall)
 
-                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Spacer(modifier = Modifier.height(12.dp))
 
-                                        // Opciones para cambiar el estado si está PENDIENTE
                                         if (request.status == "PENDING") {
                                             Row(
                                                 modifier = Modifier.fillMaxWidth(),
-                                                horizontalArrangement = Arrangement.SpaceAround
+                                                horizontalArrangement = Arrangement.SpaceBetween
                                             ) {
                                                 Button(
                                                     onClick = {
                                                         adoptionRequestViewModel.updateAdoptionRequestStatus(request.id, "ACCEPTED")
                                                     },
-                                                    enabled = updateStatusState !is UpdateAdoptionRequestStatusUiState.Loading // Deshabilitar si se está actualizando
+                                                    enabled = updateStatusState !is UpdateAdoptionRequestStatusUiState.Loading,
+                                                    colors = ButtonDefaults.buttonColors(containerColor = TuonsBlue)
                                                 ) {
                                                     if (updateStatusState is UpdateAdoptionRequestStatusUiState.Loading) {
-                                                        CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                                                        CircularProgressIndicator(
+                                                            modifier = Modifier.size(20.dp),
+                                                            color = Color.White
+                                                        )
                                                     } else {
-                                                        Text("Aceptar")
+                                                        Text("Aceptar", color = Color.White)
                                                     }
                                                 }
                                                 Button(
@@ -133,14 +153,15 @@ fun ShelterAdoptionRequestsScreen(
                                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                                                 ) {
                                                     if (updateStatusState is UpdateAdoptionRequestStatusUiState.Loading) {
-                                                        CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                                                        CircularProgressIndicator(
+                                                            modifier = Modifier.size(20.dp),
+                                                            color = Color.White
+                                                        )
                                                     } else {
-                                                        Text("Rechazar")
+                                                        Text("Rechazar", color = Color.White)
                                                     }
                                                 }
                                             }
-                                        } else {
-                                            Text("Estado: ${request.status}", style = MaterialTheme.typography.bodySmall)
                                         }
                                     }
                                 }
@@ -148,8 +169,7 @@ fun ShelterAdoptionRequestsScreen(
                         }
                     }
                 }
-                is AdoptionRequestUiState.OneRequest -> { /* No esperado aquí */ }
-                AdoptionRequestUiState.Idle -> { /* Estado inicial */ }
+                else -> {}
             }
         }
     }

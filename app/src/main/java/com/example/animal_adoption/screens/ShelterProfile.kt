@@ -3,8 +3,10 @@ package com.example.animal_adoption.screens
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ExitToApp
@@ -32,9 +34,8 @@ fun ShelterProfile(
     navController: NavHostController,
     shelter: ShelterDTO?
 ) {
-    // Disable device back button
-    BackHandler(enabled = true) {}
-
+    val TuonsBlue = Color(0xFF4285F4)
+    val lightBlueBackground = Color(0xFFBBDEFB)
     var showMenu by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -47,231 +48,118 @@ fun ShelterProfile(
                     .background(MaterialTheme.colorScheme.background)
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
+                    modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(150.dp)
-                            .background(Color(0xFFBBDEFB)),
+                            .height(180.dp)
+                            .background(TuonsBlue),
                         contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(100.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.AccountCircle,
-                                contentDescription = "Shelter Logo",
-                                tint = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.size(50.dp)
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Box(
+                                modifier = Modifier
+                                    .size(100.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.2f))
+                                    .border(2.dp, Color.White, CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.AccountCircle,
+                                    contentDescription = "Shelter Logo",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(60.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = shelter?.sheltername ?: "Shelter Name",
+                                style = MaterialTheme.typography.headlineMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 24.sp
+                                ),
+                                color = Color.White
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = shelter?.sheltername ?: "Shelter Name",
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 24.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Shelter ID: ${shelter?.id ?: "N/A"}",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-                    )
-
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Two-column layout for cards
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        // Left Column
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(end = 8.dp)
-                        ) {
-                            if (!shelter?.phone.isNullOrEmpty()) {
-                                Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth(),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0))
-                                ) {
-                                    Column(
-                                        modifier = Modifier.padding(16.dp)
-                                    ) {
-                                        Text(
-                                            text = "Phone Number",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        Text(
-                                            text = shelter.phone,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                                        )
-                                    }
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0))
-                            ) {
-                                Column(
-                                    modifier = Modifier.padding(16.dp)
-                                ) {
-                                    Text(
-                                        text = "Birthday",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        text = "04/10/2003",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                                    )
-                                }
-                            }
-                        }
-
-                        // Right Column
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(start = 8.dp)
-                        ) {
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0))
-                            ) {
-                                Column(
-                                    modifier = Modifier.padding(16.dp)
-                                ) {
-                                    Text(
-                                        text = "City",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        text = "Barcelona",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                                    )
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            if (!shelter?.email.isNullOrEmpty()) {
-                                Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth(),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0))
-                                ) {
-                                    Column(
-                                        modifier = Modifier.padding(16.dp)
-                                    ) {
-                                        Text(
-                                            text = "Email",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        Text(
-                                            text = shelter.email,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                    // CARD: Phone
+                    if (!shelter?.phone.isNullOrEmpty()) {
+                        InfoCard("Phone Number", shelter!!.phone, TuonsBlue, lightBlueBackground)
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
 
-                    Spacer(modifier = Modifier.weight(1f))
+                    // CARD: Birthday (estático)
+                    InfoCard("Birthday", "04/10/2003", TuonsBlue, lightBlueBackground)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // CARD: City (estático)
+                    InfoCard("City", "Barcelona", TuonsBlue, lightBlueBackground)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // CARD: Email
+                    if (!shelter?.email.isNullOrEmpty()) {
+                        InfoCard("Email", shelter!!.email, TuonsBlue, lightBlueBackground)
+                    }
+
+                    Spacer(modifier = Modifier.weight(0.5f))
                 }
 
-                // Icono y menú desplegable en la esquina superior derecha
+                // MENU: Icono superior derecho
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 10.dp, end = 16.dp)
                         .align(Alignment.TopEnd)
+                        .padding(top = 10.dp, end = 10.dp)
                 ) {
-                    IconButton(onClick = { showMenu = !showMenu }) {
+                    IconButton(
+                        onClick = { showMenu = !showMenu },
+                        modifier = Modifier.align(Alignment.CenterEnd)
+                    ) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
                             contentDescription = "Opciones",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = Color.White
                         )
                     }
                     DropdownMenu(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false },
-                        modifier = Modifier.align(Alignment.TopEnd),
-                        shadowElevation = MenuDefaults.ShadowElevation,
-                        offset = DpOffset(10.dp, 10.dp)
+                        offset = DpOffset(x = (-10).dp, y = 0.dp)
                     ) {
                         DropdownMenuItem(
                             text = { Text("Editar perfil") },
                             onClick = {
-                                Log.d("ShelterProfile", "Opción seleccionada: Editar perfil")
+                                Log.d("ShelterProfile", "Editar perfil")
                                 showMenu = false
-                                val shelterJson = Gson().toJson(shelter)
-                                val encodedShelterJson = URLEncoder.encode(shelterJson, StandardCharsets.UTF_8.toString())
-                                navController.navigate("ShelterUpdateData/$encodedShelterJson")
+                                val json = Gson().toJson(shelter)
+                                val encoded = URLEncoder.encode(json, StandardCharsets.UTF_8.toString())
+                                navController.navigate("ShelterUpdateData/$encoded")
                             }
                         )
                         DropdownMenuItem(
                             text = { Text("Configuración") },
                             onClick = {
-                                Log.d("ShelterProfile", "Opción seleccionada: Configuración")
+                                Log.d("ShelterProfile", "Configuración")
                                 showMenu = false
-                                val shelterJson = Gson().toJson(shelter)
-                                navController.navigate("ShelterConfiguration/$shelterJson")
+                                navController.navigate("ShelterConfiguration/${Gson().toJson(shelter)}")
                             }
                         )
                         DropdownMenuItem(
                             trailingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.ExitToApp,
-                                    contentDescription = "Exit",
-                                    tint = Color.Red
-                                )
+                                Icon(Icons.Default.ExitToApp, contentDescription = "Exit", tint = TuonsBlue)
                             },
-                            text = { Text(
-                                text = "Exit",
-                                color = Color.Red
-                            ) },
+                            text = { Text("Exit", color = TuonsBlue) },
                             onClick = {
-                                Log.d("ShelterProfile", "Opción seleccionada: Cerrar sesión")
+                                Log.d("ShelterProfile", "Cerrar sesión")
                                 showMenu = false
                                 navController.navigate("FirstScreen") {
-                                    popUpTo(navController.graph.startDestinationId) {
-                                        inclusive = true
-                                    }
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
                                 }
                             }
                         )
@@ -280,4 +168,30 @@ fun ShelterProfile(
             }
         }
     )
+}
+
+@Composable
+fun InfoCard(title: String, content: String, accentColor: Color, backgroundColor: Color) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = backgroundColor)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = accentColor
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = content,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
 }

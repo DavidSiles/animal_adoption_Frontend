@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -54,6 +55,8 @@ fun ShelterCreateAnimal(
     var errorMessage by remember { mutableStateOf("") }
     var connectMessage by remember { mutableStateOf(false) }
 
+    val TuonsBlue = Color(0xFF4285F4)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -77,7 +80,7 @@ fun ShelterCreateAnimal(
     ) {
         Text(text = "Welcome Shelter ${shelter?.sheltername ?: "Guest"}")
 
-        Text(text = "Create New Animal", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+        Text(text = "Create new animal", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -167,7 +170,12 @@ fun ShelterCreateAnimal(
                     }
                 }
             }
-        }) {
+        },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = TuonsBlue,
+                contentColor = Color.White
+            )
+        ) {
             Text(text = "Create Animal")
         }
 

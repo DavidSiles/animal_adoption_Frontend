@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,6 +42,8 @@ fun ShelterHome(
     // Disable device back button
     BackHandler(enabled = true) {}
 
+    val TuonsBlue = Color(0xFF4285F4)
+
     Scaffold(
         bottomBar = { ShelterBottomBar(navController, shelter) },
         content = { paddingValues ->
@@ -49,7 +52,7 @@ fun ShelterHome(
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
                     .padding(paddingValues)
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Carousel with cycling messages
@@ -76,7 +79,7 @@ fun ShelterHome(
                         .fillMaxWidth()
                         .height(80.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                        .background(TuonsBlue.copy(alpha = 0.85f)),
                     contentAlignment = Alignment.Center
                 ) {
                     HorizontalPager(
@@ -87,10 +90,11 @@ fun ShelterHome(
                             text = messages[page],
                             style = MaterialTheme.typography.headlineMedium.copy(
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 24.sp,
-                                color = MaterialTheme.colorScheme.primary
+                                fontSize = 20.sp,
+                                color = Color.White
                             ),
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            fontFamily = FontFamily.Default,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
@@ -111,51 +115,58 @@ fun ShelterHome(
 
                     Card(
                         modifier = Modifier
+                            .fillMaxWidth(0.8f)
+                            .height(180.dp)
                             .clickable {
                                 val shelterJson = Gson().toJson(shelter)
                                 navController.navigate("ShelterCreateAnimal/$shelterJson")
                             }
                             .padding(8.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                        shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surface
                         )
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(16.dp)
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxSize().padding(16.dp)
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(64.dp)
+                                    .size(72.dp)
                                     .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary)
-                                    .border(2.dp, MaterialTheme.colorScheme.onPrimary, CircleShape),
+                                    .background(TuonsBlue)
+                                    .border(2.dp, Color.White, CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Add,
                                     contentDescription = "Add new animal",
-                                    tint = MaterialTheme.colorScheme.onPrimary,
-                                    modifier = Modifier.size(36.dp)
+                                    tint = Color.White,
+                                    modifier = Modifier.size(40.dp)
                                 )
                             }
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
                             Text(
                                 text = "Add New Animal",
-                                style = MaterialTheme.typography.bodyLarge.copy(
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = 16.sp
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 20.sp
                                 ),
+                                fontFamily = FontFamily.Default,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
                     Card(
                         modifier = Modifier
+                            .fillMaxWidth(0.8f)
+                            .height(180.dp)
                             .clickable {
                                 val shelterJson = URLEncoder.encode(
                                     Gson().toJson(shelter),
@@ -164,43 +175,45 @@ fun ShelterHome(
                                 navController.navigate("ShelterListAnimals/$shelterJson")
                             }
                             .padding(8.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                        shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surface
                         )
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(16.dp)
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxSize().padding(16.dp)
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(64.dp)
+                                    .size(72.dp)
                                     .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary)
-                                    .border(2.dp, MaterialTheme.colorScheme.onPrimary, CircleShape),
+                                    .background(TuonsBlue)
+                                    .border(2.dp, Color.White, CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Create, // Replace with a suitable icon
+                                    imageVector = Icons.Default.Create,
                                     contentDescription = "View your animals",
-                                    tint = MaterialTheme.colorScheme.onPrimary,
-                                    modifier = Modifier.size(36.dp)
+                                    tint = Color.White,
+                                    modifier = Modifier.size(40.dp)
                                 )
                             }
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
                             Text(
                                 text = "View your animals",
-                                style = MaterialTheme.typography.bodyLarge.copy(
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = 16.sp
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 20.sp
                                 ),
+                                fontFamily = FontFamily.Default,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }

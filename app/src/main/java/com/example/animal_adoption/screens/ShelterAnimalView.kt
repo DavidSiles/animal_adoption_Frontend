@@ -13,19 +13,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.paddingFrom
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,13 +44,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.BrushPainter
-import androidx.compose.ui.layout.AlignmentLine
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -60,12 +56,11 @@ import com.example.animal_adoption.model.AnimalDTO
 import com.example.animal_adoption.model.ShelterDTO
 import com.example.animal_adoption.screens.widgets.ConfirmationDialog
 import com.example.animal_adoption.viewmodel.DeleteAnimalMessageUiState
-import com.example.animal_adoption.viewmodel.DeleteShelterMessageUiState
 import com.example.animal_adoption.viewmodel.RemoteAnimalViewModel
-import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
 import com.google.gson.Gson
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,29 +75,66 @@ fun ShelterAnimalView(
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     val deleteAnimalMessageUiState by remoteAnimalViewModel.deleteAnimalMessageUiState.collectAsState()
+    var isLoading by remember { mutableStateOf(false) }
+
+
+    val TuonsBlue = Color(0xFF4285F4)
 
     if (animal == null || shelter == null) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
-            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Error loading animal or shelter data",
-                color = MaterialTheme.colorScheme.error
+                text = "Error al cargar los datos del animal o refugio.",
+                color = MaterialTheme.colorScheme.error,
+                fontFamily = FontFamily.Default,
+                textAlign = TextAlign.Center
             )
         }
         return
     }
 
-    // Log animal details to debug REIAC
-    Log.d("ShelterAnimalView", "Animal: ${animal.name}, REIAC: ${animal.reiac}")
+
+    LaunchedEffect(deleteAnimalMessageUiState) {
+        when (deleteAnimalMessageUiState) {
+            is DeleteAnimalMessageUiState.Success -> {
+                isLoading = false
+                errorMessage = ""
+                val shelterJson = Gson().toJson(shelter)
+                val encodedShelterJson = URLEncoder.encode(shelterJson, StandardCharsets.UTF_8.toString())
+                navController.navigate("ShelterListAnimals/$encodedShelterJson") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                }
+            }
+            is DeleteAnimalMessageUiState.Error -> {
+                isLoading = false
+                errorMessage = (deleteAnimalMessageUiState as DeleteAnimalMessageUiState.Error).message
+            }
+            is DeleteAnimalMessageUiState.Loading -> {
+                isLoading = true
+                errorMessage = ""
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("${animal.name} details") },
+                title = {
+                    Text(
+                        text = "${animal.name} - Detalles",
+                        fontFamily = FontFamily.Default,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        color = Color.White
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = {
                         val shelterJson = Gson().toJson(shelter)
@@ -115,20 +147,22 @@ fun ShelterAnimalView(
                         }
                     }) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back to shelter animals"
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Volver a la lista de animales",
+                            tint = Color.White
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = TuonsBlue.copy(alpha = 0.85f),
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White,
+                    actionIconContentColor = Color.White
                 ),
                 actions = {
-                    // Icono y menú desplegable en la esquina superior derecha
                     Box(
-                        modifier = Modifier
-                            .size(80.dp)
+                        modifier = Modifier.size(64.dp),
+                        contentAlignment = Alignment.Center
                     ) {
                         IconButton(
                             onClick = { showMenu = !showMenu },
@@ -137,7 +171,7 @@ fun ShelterAnimalView(
                             Icon(
                                 imageVector = Icons.Default.MoreVert,
                                 contentDescription = "Opciones",
-                                tint = Color.Black
+                                tint = Color.White
                             )
                         }
                         DropdownMenu(
@@ -146,26 +180,27 @@ fun ShelterAnimalView(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
                                 .width(IntrinsicSize.Max)
-                                .background(Color.Red),
+                                .background(MaterialTheme.colorScheme.surface),
                             shadowElevation = MenuDefaults.ShadowElevation,
                             offset = DpOffset(
-                                x = (-8).dp, // Ajusta hacia la izquierda para alinear al borde derecho
-                                y = 8.dp // Espacio vertical para evitar superposición con el TopAppBar
+                                x = (-8).dp,
+                                y = 8.dp
                             )
                         ) {
                             DropdownMenuItem(
                                 trailingIcon = {
                                     Icon(
                                         imageVector = Icons.Default.Delete,
-                                        contentDescription = "Delete Animal",
-                                        tint = Color.Black
+                                        contentDescription = "Eliminar Animal",
+                                        tint = MaterialTheme.colorScheme.error
                                     )
                                 },
                                 text = {
                                     Text(
-                                        text = "Delete Animal",
-                                        color = Color.Black,
-                                        fontWeight = FontWeight.Bold
+                                        text = "Eliminar Animal",
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = FontFamily.Default
                                     )
                                 },
                                 onClick = {
@@ -179,22 +214,26 @@ fun ShelterAnimalView(
             )
         },
         bottomBar = {
-            BottomAppBar {
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(60.dp)
-                        .padding(5.dp),
-                    onClick = {
-                        val animalJson = Gson().toJson(animal)
-                        val shelterJson = Gson().toJson(shelter)
-                        val encodedAnimalJson = URLEncoder.encode(animalJson, StandardCharsets.UTF_8.toString())
-                        val encodedShelterJson = URLEncoder.encode(shelterJson, StandardCharsets.UTF_8.toString())
-                        navController.navigate("ShelterUpdateAnimal/$encodedAnimalJson/$encodedShelterJson")
-                    }
-                ) {
-                    Text("Update Animal data")
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .padding(horizontal = 24.dp, vertical = 8.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = TuonsBlue,
+                    contentColor = Color.White
+                ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp),
+                onClick = {
+                    val animalJson = Gson().toJson(animal)
+                    val shelterJson = Gson().toJson(shelter)
+                    val encodedAnimalJson = URLEncoder.encode(animalJson, StandardCharsets.UTF_8.toString())
+                    val encodedShelterJson = URLEncoder.encode(shelterJson, StandardCharsets.UTF_8.toString())
+                    navController.navigate("ShelterUpdateAnimal/$encodedAnimalJson/$encodedShelterJson")
                 }
+            ) {
+                Text("Actualizar Datos del Animal", fontSize = 18.sp, fontFamily = FontFamily.Default)
             }
         }
 
@@ -203,60 +242,35 @@ fun ShelterAnimalView(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp)
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .background(MaterialTheme.colorScheme.background),
+            horizontalAlignment = Alignment.Start
         ) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Name: ${animal.name}",
-                style = MaterialTheme.typography.bodyLarge,
+                text = "Nombre: ${animal.name}",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Default,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "REIAC: ${animal.reiac}",
                 style = MaterialTheme.typography.bodyLarge,
+                fontFamily = FontFamily.Default,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth()
             )
         }
-    }
-
-    // Handle Delete UI State
-    when (deleteAnimalMessageUiState) {
-        is DeleteAnimalMessageUiState.Success -> {
-            LaunchedEffect(Unit) {
-                val shelterJson = Gson().toJson(shelter)
-                navController.navigate("ShelterListAnimals/$shelterJson") {
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = true
-                    }
-                }
-            }
-        }
-        is DeleteAnimalMessageUiState.Error -> {
-            errorMessage = (deleteAnimalMessageUiState as DeleteAnimalMessageUiState.Error).message
-        }
-        is DeleteAnimalMessageUiState.Loading -> {
-
-        }
-    }
-
-    if (errorMessage.isNotEmpty()) {
-        Text(
-            text = errorMessage,
-            color = MaterialTheme.colorScheme.error,
-            fontSize = 14.sp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-        )
     }
 
     // Delete Confirmation Dialog
     if (showDeleteConfirmation) {
         ConfirmationDialog(
             title = "Confirmar Eliminación",
-            message = "¿Estás seguro de que quieres eliminar tu animal ${animal.name}? Esta acción no se puede deshacer.",
+            message = "¿Estás seguro de que quieres eliminar al animal ${animal.name}? Esta acción no se puede deshacer.",
             confirmText = "Eliminar",
             dismissText = "Cancelar",
             onConfirm = {
@@ -264,8 +278,7 @@ fun ShelterAnimalView(
                 animal.id.let { animalId ->
                     remoteAnimalViewModel.deleteAnimal(
                         animalId = animal.id,
-                        onSuccess = { message ->
-                        },
+                        onSuccess = { /* Handled by LaunchedEffect */ },
                         onFailure = { error ->
                             errorMessage = error
                         }
@@ -275,6 +288,4 @@ fun ShelterAnimalView(
             onDismiss = { showDeleteConfirmation = false }
         )
     }
-
 }
-

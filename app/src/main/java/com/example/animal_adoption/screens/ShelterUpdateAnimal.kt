@@ -11,6 +11,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults // Import ButtonDefaults for colors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color // Import Color for TuonsBlue
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -50,6 +52,9 @@ fun ShelterUpdateAnimal(
     animal: AnimalDTO?,
     shelter: ShelterDTO?
 ) {
+    // Define the custom blue color for shelters
+    val TuonsBlue = Color(0xFF4285F4)
+
     // Handle null animal or shelter data
     if (animal == null || shelter == null) {
         Column(
@@ -96,8 +101,9 @@ fun ShelterUpdateAnimal(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = TuonsBlue.copy(alpha = 0.85f),
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
                 )
             )
         }
@@ -213,7 +219,11 @@ fun ShelterUpdateAnimal(
                         }
                     }
 
-                }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = TuonsBlue,
+                    contentColor = Color.White // Ensures text is white on the blue button
+                )
             ) {
                 Text("Save Changes")
             }
