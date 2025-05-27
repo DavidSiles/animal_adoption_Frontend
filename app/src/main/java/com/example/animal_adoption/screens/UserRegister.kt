@@ -21,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -42,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.animal_adoption.R
+import com.example.animal_adoption.screens.widgets.FieldValidations
 import com.example.animal_adoption.viewmodel.LoginMessageUiState
 import com.example.animal_adoption.viewmodel.NetworkModule.WithServiceInitialization
 import com.example.animal_adoption.viewmodel.RemoteUserViewModel
@@ -56,6 +58,8 @@ fun UserRegister(
     val loginMessageUiState by remoteUserViewModel.loginMessageUiState.collectAsState()
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var usernameError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf("") }
     var connectMessage by remember { mutableStateOf(false) }
 
@@ -107,34 +111,64 @@ fun UserRegister(
 
         OutlinedTextField(
             value = username,
-            onValueChange = { username = it },
+            onValueChange = { newValue ->
+                username = newValue
+                usernameError = FieldValidations.validateName(newValue)
+                            },
             label = { Text("Username") },
             singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 12.dp),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(12.dp),
+            isError = usernameError != null,
+            supportingText = {
+                usernameError?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
         )
 
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = { newValue ->
+                password = newValue
+                passwordError = FieldValidations.validatePassword(newValue)
+            },
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 24.dp),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(12.dp),
+            isError = passwordError != null,
+            supportingText = {
+                passwordError?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
         )
 
         Button(
             onClick = {
+                usernameError = FieldValidations.validateName(username)
+                passwordError = FieldValidations.validatePassword(password)
                 errorMessage = ""
-                remoteUserViewModel.register(username, password) { user ->
-                    val userJson = Gson().toJson(user)
-                    navController.navigate("UserHome/$userJson")
+                if (usernameError == null && passwordError == null) {
+                    remoteUserViewModel.register(username, password) { user ->
+                        val userJson = Gson().toJson(user)
+                        navController.navigate("UserHome/$userJson")
+                    }
+                    connectMessage = true
                 }
-                connectMessage = true
             },
             modifier = Modifier
                 .fillMaxWidth()
