@@ -34,6 +34,9 @@ fun ShelterProfile(
     navController: NavHostController,
     shelter: ShelterDTO?
 ) {
+    // Disable device back button
+    BackHandler(enabled = true) {}
+
     val TuonsBlue = Color(0xFF4285F4)
     val lightBlueBackground = Color(0xFFBBDEFB)
     var showMenu by remember { mutableStateOf(false) }
@@ -90,7 +93,7 @@ fun ShelterProfile(
 
                     // CARD: Phone
                     if (!shelter?.phone.isNullOrEmpty()) {
-                        InfoCard("Phone Number", shelter!!.phone, TuonsBlue, lightBlueBackground)
+                        InfoCard("Phone Number", shelter.phone, TuonsBlue, lightBlueBackground)
                         Spacer(modifier = Modifier.height(8.dp))
                     }
 
@@ -104,7 +107,7 @@ fun ShelterProfile(
 
                     // CARD: Email
                     if (!shelter?.email.isNullOrEmpty()) {
-                        InfoCard("Email", shelter!!.email, TuonsBlue, lightBlueBackground)
+                        InfoCard("Email", shelter.email, TuonsBlue, lightBlueBackground)
                     }
 
                     Spacer(modifier = Modifier.weight(0.5f))

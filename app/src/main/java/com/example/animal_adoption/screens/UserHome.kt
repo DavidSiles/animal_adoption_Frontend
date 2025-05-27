@@ -48,7 +48,7 @@ fun UserHome(
     animalViewModel: RemoteAnimalViewModel,
     shelterViewModel: RemoteShelterViewModel
 ) {
-    // Deshabilita el botón de retroceso del dispositivo para que el usuario no pueda salir de la pantalla de inicio
+    // Disable device back button
     BackHandler(enabled = true) {}
 
     val animalUiState by animalViewModel.animalUiState.collectAsState()

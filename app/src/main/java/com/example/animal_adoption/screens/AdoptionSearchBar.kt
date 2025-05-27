@@ -1,5 +1,6 @@
 package com.example.animal_adoption.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -35,6 +36,9 @@ fun AdoptionSearchBar(
     user: UserDTO? = null,
     shelter: ShelterDTO? = null
 ) {
+    // Disable device back button
+    BackHandler(enabled = true) {}
+
     val adoptionUiState by viewModel.adoptionUiState.collectAsState()
     val animalSearchState by viewModel.animalSearchState.collectAsState()
     val statusFilter by viewModel.statusFilter.collectAsState()

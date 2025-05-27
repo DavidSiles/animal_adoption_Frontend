@@ -1,6 +1,7 @@
 package com.example.animal_adoption.screens
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -63,6 +64,9 @@ fun UserProfile(
     navController: NavHostController,
     user: UserDTO?
 ) {
+    // Disable device back button
+    BackHandler(enabled = true) {}
+
     var showMenu by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -83,7 +87,7 @@ fun UserProfile(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(150.dp)
-                            .background(Color(0xFFBBDEFB)),
+                            .background(Color(0xFFFF7043)),
                         contentAlignment = Alignment.Center
                     ) {
                         Box(

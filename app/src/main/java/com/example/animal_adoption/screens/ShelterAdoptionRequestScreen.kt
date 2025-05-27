@@ -13,32 +13,38 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.example.animal_adoption.viewmodel.RemoteAdoptionRequestViewModel
 import com.example.animal_adoption.viewmodel.AdoptionRequestUiState
 import com.example.animal_adoption.viewmodel.UpdateAdoptionRequestStatusUiState
 import android.util.Log
+import androidx.activity.compose.BackHandler
+import androidx.navigation.NavHostController
+import com.example.animal_adoption.model.ShelterDTO
+import com.example.animal_adoption.screens.widgets.ShelterBottomBar
 
 val TuonsBlue = Color(0xFF4285F4)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShelterAdoptionRequestsScreen(
-    navController: NavController,
-    shelterId: Int,
+    navController: NavHostController,
+    shelter: ShelterDTO,
     adoptionRequestViewModel: RemoteAdoptionRequestViewModel
 ) {
+    // Disable device back button
+    BackHandler(enabled = true) {}
+
     val context = LocalContext.current
     val uiState by adoptionRequestViewModel.adoptionRequestUiState.collectAsState()
     val updateStatusState by adoptionRequestViewModel.updateAdoptionRequestStatusUiState.collectAsState()
 
-    LaunchedEffect(shelterId, updateStatusState) {
+    LaunchedEffect(shelter.id, updateStatusState) {
         if (updateStatusState is UpdateAdoptionRequestStatusUiState.Success ||
             updateStatusState is UpdateAdoptionRequestStatusUiState.Error ||
             updateStatusState is UpdateAdoptionRequestStatusUiState.Idle
         ) {
-            Log.d("ShelterAdoptionRequests", "Recargando solicitudes para refugio ID: $shelterId")
-            adoptionRequestViewModel.getAdoptionRequestsByShelterId(shelterId)
+            Log.d("ShelterAdoptionRequests", "Recargando solicitudes para refugio ID: ${shelter.id}")
+            adoptionRequestViewModel.getAdoptionRequestsByShelterId(shelter.id)
         }
     }
 
@@ -58,17 +64,7 @@ fun ShelterAdoptionRequestsScreen(
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Adoption requests") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = TuonsBlue, titleContentColor = Color.White)
-            )
-        }
+        bottomBar = { ShelterBottomBar(navController, shelter) },
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -90,7 +86,7 @@ fun ShelterAdoptionRequestsScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
-                        onClick = { adoptionRequestViewModel.getAdoptionRequestsByShelterId(shelterId) },
+                        onClick = { adoptionRequestViewModel.getAdoptionRequestsByShelterId(shelter.id) },
                         colors = ButtonDefaults.buttonColors(containerColor = TuonsBlue)
                     ) {
                         Text("Reintentar", color = Color.White)

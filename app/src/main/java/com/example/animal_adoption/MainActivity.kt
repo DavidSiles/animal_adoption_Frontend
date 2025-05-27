@@ -39,10 +39,7 @@ import com.example.animal_adoption.screens.UserRegister
 import com.example.animal_adoption.viewmodel.RemoteAnimalViewModel
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
 import com.example.animal_adoption.viewmodel.RemoteUserViewModel
-import com.example.animal_adoption.screens.ShelterProfile
-import com.example.animal_adoption.screens.ShelterUpdateAnimal
 import com.example.animal_adoption.screens.UserConfiguration
-import com.example.animal_adoption.screens.ShelterUpdateData
 import com.example.animal_adoption.screens.UserAnimalView
 import com.example.animal_adoption.viewmodel.RemoteAdoptionViewModel
 import com.example.animal_adoption.viewmodel.RemoteAdoptionRequestViewModel
@@ -127,15 +124,13 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    composable(route = "UserAdoptionRequests/{userId}",
-                        arguments = listOf(navArgument("userId") { type = NavType.IntType })
-                    ) { backStackEntry ->
-                        val userId = backStackEntry.arguments?.getInt("userId")
+                    composable(route = "UserAdoptionRequests/{user}") { backStackEntry ->
+                        val user = deserializeUser(backStackEntry)
                         val adoptionRequestFactory = RemoteAdoptionRequestViewModelFactory(applicationContext)
-                        if (userId != null) {
+                        if (user != null) {
                             UserAdoptionRequestsScreen(
                                 navController = navController,
-                                userId = userId,
+                                user = user,
                                 adoptionRequestViewModel = viewModel(factory = adoptionRequestFactory)
                             )
                         } else {
@@ -300,15 +295,13 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    composable(route = "ShelterAdoptionRequests/{shelterId}",
-                        arguments = listOf(navArgument("shelterId") { type = NavType.IntType })
-                    ) { backStackEntry ->
-                        val shelterId = backStackEntry.arguments?.getInt("shelterId")
+                    composable(route = "ShelterAdoptionRequests/{shelter}") { backStackEntry ->
+                        val shelter = deserializeShelter(backStackEntry)
                         val adoptionRequestFactory = RemoteAdoptionRequestViewModelFactory(applicationContext)
-                        if (shelterId != null) {
+                        if (shelter != null) {
                             ShelterAdoptionRequestsScreen(
                                 navController = navController,
-                                shelterId = shelterId,
+                                shelter = shelter,
                                 adoptionRequestViewModel = viewModel(factory = adoptionRequestFactory)
                             )
                         } else {

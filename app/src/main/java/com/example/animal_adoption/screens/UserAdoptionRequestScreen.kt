@@ -14,31 +14,32 @@ import androidx.navigation.NavController
 import com.example.animal_adoption.viewmodel.RemoteAdoptionRequestViewModel
 import com.example.animal_adoption.viewmodel.AdoptionRequestUiState
 import android.util.Log // Para logs
+import androidx.activity.compose.BackHandler
+import androidx.navigation.NavHostController
+import com.example.animal_adoption.model.UserDTO
+import com.example.animal_adoption.screens.widgets.UserBottomBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserAdoptionRequestsScreen(
-    navController: NavController,
-    userId: Int,
+    navController: NavHostController,
+    user: UserDTO,
     adoptionRequestViewModel: RemoteAdoptionRequestViewModel
 ) {
+
+    // Disable device back button
+    BackHandler(enabled = true) {}
+
     val uiState by adoptionRequestViewModel.adoptionRequestUiState.collectAsState()
 
-    LaunchedEffect(userId) {
-        Log.d("UserAdoptionRequests", "Cargando solicitudes para usuario ID: $userId")
-        adoptionRequestViewModel.getAdoptionRequestsByUserId(userId)
+    LaunchedEffect(user.id) {
+        Log.d("UserAdoptionRequests", "Cargando solicitudes para usuario ID: ${user.id}")
+        adoptionRequestViewModel.getAdoptionRequestsByUserId(user.id)
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Mis Solicitudes de Adopción") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
-                    }
-                }
-            )
+        bottomBar = {
+            UserBottomBar(navController = navController, user = user)
         }
     ) { paddingValues ->
         Column(
@@ -56,7 +57,7 @@ fun UserAdoptionRequestsScreen(
                 }
                 is AdoptionRequestUiState.Error -> {
                     Text("Error al cargar tus solicitudes de adopción. Inténtalo de nuevo.", color = MaterialTheme.colorScheme.error)
-                    Button(onClick = { adoptionRequestViewModel.getAdoptionRequestsByUserId(userId) }) {
+                    Button(onClick = { adoptionRequestViewModel.getAdoptionRequestsByUserId(user.id) }) {
                         Text("Reintentar")
                     }
                 }
