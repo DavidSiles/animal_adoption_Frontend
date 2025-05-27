@@ -14,9 +14,9 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,13 +28,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.animal_adoption.model.ShelterDTO
 import com.example.animal_adoption.viewmodel.RemoteShelterViewModel
 import com.google.gson.Gson
 
+data class ShelterBottomNavItem(
+    val label: String,
+    val icon: ImageVector,
+    val route: String
+)
 
 @Composable
 fun ShelterBottomBar(
@@ -42,84 +51,69 @@ fun ShelterBottomBar(
     shelter: ShelterDTO?
 ) {
     val shelterJson = Gson().toJson(shelter)
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    val TuonsBlue = Color(0xFF4285F4)
+    val items = listOf(
+        ShelterBottomNavItem("Home", Icons.Default.Home, "ShelterHome/$shelterJson"),
+        ShelterBottomNavItem("Animals", Icons.AutoMirrored.Filled.List, "ShelterListAnimals/$shelterJson"), // Changed icon to List
+        ShelterBottomNavItem("Requests", Icons.Default.Pets, "ShelterAdoptionRequests/${shelter?.id}"), // Changed label to "Requests"
+        ShelterBottomNavItem("Profile", Icons.Default.AccountCircle, "ShelterProfile/$shelterJson")
+    )
 
-    BottomAppBar {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(12.dp)
-                    .width(80.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ){
-                IconButton(onClick = { navController.navigate("ShelterHome/$shelterJson") }) {
-                    Icon(Icons.Default.Home, contentDescription = "Home")
-                }
-                Text(
-                    text = "Home",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+    NavigationBar(
+        containerColor = TuonsBlue, // Apply the blue color
+        tonalElevation = 4.dp // Add a subtle elevation
+    ) {
+        items.forEach { item ->
+            // Determine if the item is selected based on the current route
+            val isSelected = currentRoute == item.route ||
+                    (item.route.contains("ShelterHome") && currentRoute?.startsWith("ShelterHome") == true) ||
+                    (item.route.contains("ShelterListAnimals") && currentRoute?.startsWith("ShelterListAnimals") == true) ||
+                    (item.route.contains("ShelterAdoptionRequests") && currentRoute?.startsWith("ShelterAdoptionRequests") == true) ||
+                    (item.route.contains("ShelterProfile") && currentRoute?.startsWith("ShelterProfile") == true)
+
+            // Determine content color based on selection state
+            val contentColor = if (isSelected) {
+                Color.White // White for selected item
+            } else {
+                Color.White.copy(alpha = 0.7f)
             }
-            Column(
-                modifier = Modifier
-                    .padding(12.dp)
-                    .width(80.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                IconButton(onClick = { navController.navigate("ShelterListAnimals/$shelterJson") }) {
-                    Icon(Icons.Default.Menu, contentDescription = "Animals")
-                }
-                Text(
-                    text = "Animals",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(vertical = 4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                IconButton(onClick = {
-                    if (shelter != null) {
-                        Log.d("ShelterBottomBar", "Navigating to ShelterAdoptionRequests for userId: ${shelter.id}")
-                        navController.navigate("ShelterAdoptionRequests/${shelter.id}") {
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    } else {
-                        Log.e("ShelterBottomBar", "Shelter is null, cannot navigate to ShelterAdoptionRequests.")
+
+            NavigationBarItem(
+                icon = {
+                    Icon(
+                        item.icon,
+                        contentDescription = item.label,
+                        tint = contentColor
+                    )
+                },
+                label = {
+                    Text(
+                        item.label,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontFamily = FontFamily.Default,
+                        color = contentColor
+                    )
+                },
+                selected = isSelected,
+                onClick = {
+                    if (item.route.contains("ShelterAdoptionRequests") && shelter?.id == null) {
+                        Log.e("ShelterBottomBar", "Shelter ID is null, cannot navigate to ShelterAdoptionRequests.")
+                        return@NavigationBarItem
                     }
-                }) {
-                    Icon(Icons.Default.ListAlt, contentDescription = "My Requests") // Icono para solicitudes
-                }
-                Text(
-                    text = "My Requests",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Column(
-                modifier = Modifier
-                    .padding(12.dp)
-                    .width(80.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                IconButton(onClick = { navController.navigate("ShelterProfile/$shelterJson") }) {
-                    Icon(Icons.Default.Person, contentDescription = "Profile")
-                }
-                Text(
-                    text = "Profile",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
 
+                    navController.navigate(item.route) {
+                        // Pop up to the start destination of the graph to avoid building up a large backstack
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true // Save the state of the popped destination
+                        }
+                        // Avoid multiple copies of the same destination when reselecting the same item
+                        launchSingleTop = true
+                        // Restore state when reselecting a previously selected item
+                        restoreState = true
+                    }
+                }
+            )
         }
     }
 }

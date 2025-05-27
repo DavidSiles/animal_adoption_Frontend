@@ -1,5 +1,6 @@
 package com.example.animal_adoption.screens
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +12,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,7 +29,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -50,23 +55,33 @@ fun ShelterUpdateData(
     remoteShelterViewModel: RemoteShelterViewModel,
     shelter: ShelterDTO?
 ) {
-    // Handle null shelter data
+    val TuonsBlue = Color(0xFF4285F4)
+
     if (shelter == null) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
-            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = "Error loading shelter data",
-                color = MaterialTheme.colorScheme.error
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center
             )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = { navController.popBackStack() },
+                colors = ButtonDefaults.buttonColors(containerColor = TuonsBlue)
+            ) {
+                Text("Go Back", color = Color.White)
+            }
         }
         return
     }
 
-    // State for editable fields
     var sheltername by remember { mutableStateOf(shelter.sheltername) }
     var email by remember { mutableStateOf(shelter.email ?: "") }
     var phone by remember { mutableStateOf(shelter.phone ?: "") }
@@ -74,33 +89,41 @@ fun ShelterUpdateData(
     var phoneError by remember { mutableStateOf<String?>(null) }
     var shelternameError by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf("") }
+
     val updateShelterMessageUiState by remoteShelterViewModel.updateShelterMessageUiState.collectAsState()
     val updatedShelter by remoteShelterViewModel.shelter.collectAsState()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Update ${updatedShelter?.sheltername ?: shelter.sheltername} details") },
+                title = {
+                    Text(
+                        "Update Shelter Profile",
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = {
                         val shelterJson = Gson().toJson(updatedShelter ?: shelter)
-                        val encodedShelterJson = URLEncoder.encode(shelterJson, StandardCharsets.UTF_8.toString())
-                        navController.navigate("ShelterProfile/$encodedShelterJson") {
-                            popUpTo("ShelterProfile/{shelter}") {
-                                inclusive = false
-                            }
+                        val encoded = URLEncoder.encode(shelterJson, StandardCharsets.UTF_8.toString())
+                        navController.navigate("ShelterProfile/$encoded") {
+                            popUpTo("ShelterProfile/{shelter}") { inclusive = false }
                             launchSingleTop = true
                         }
                     }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back to shelter profile"
+                            contentDescription = "Back",
+                            tint = Color.White
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = TuonsBlue,
+                    titleContentColor = Color.White
                 )
             )
         }
@@ -109,130 +132,95 @@ fun ShelterUpdateData(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp)
+                .padding(horizontal = 24.dp, vertical = 16.dp)
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Name field
             OutlinedTextField(
                 value = sheltername,
                 onValueChange = { sheltername = it },
                 label = { Text("Shelter Name") },
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp),
-                shape = RoundedCornerShape(12.dp),
                 isError = shelternameError != null,
                 supportingText = {
                     shelternameError?.let {
-                        Text(
-                            text = it,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
-                        )
+                        Text(it, color = MaterialTheme.colorScheme.error)
                     }
-                }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Name field
             OutlinedTextField(
                 value = email,
-                onValueChange = { newValue ->
-                    email = newValue
+                onValueChange = {
+                    email = it
                     emailError = FieldValidations.validateEmail(email)
                 },
                 label = { Text("Email") },
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp),
-                shape = RoundedCornerShape(12.dp),
                 isError = emailError != null,
                 supportingText = {
                     emailError?.let {
-                        Text(
-                            text = it,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
-                        )
+                        Text(it, color = MaterialTheme.colorScheme.error)
                     }
-                }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Name field
             OutlinedTextField(
                 value = phone,
-                onValueChange = { newValue ->
-                    phone = newValue
-                    phoneError = FieldValidations.validatePhone(newValue)
+                onValueChange = {
+                    phone = it
+                    phoneError = FieldValidations.validatePhone(it)
                 },
+                label = { Text("Phone Number") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                label = { Text("Number phone") },
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp),
-                shape = RoundedCornerShape(12.dp),
                 isError = phoneError != null,
                 supportingText = {
                     phoneError?.let {
-                        Text(
-                            text = it,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
-                        )
+                        Text(it, color = MaterialTheme.colorScheme.error)
                     }
-                }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-            // Update button
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(60.dp)
-                    .padding(5.dp),
+                    .height(56.dp),
                 onClick = {
-
                     shelternameError = FieldValidations.validateName(sheltername)
                     emailError = FieldValidations.validateEmail(email)
                     phoneError = FieldValidations.validatePhone(phone)
-                    if (emailError == null && email.isEmpty()){
-                        email = ""
-                    }
-                    if (phoneError == null && phone.isEmpty()){
-                        phone = ""
-                    }
-                    // Check if all required fields are valid
+
                     if (shelternameError == null && emailError == null && phoneError == null) {
-                        // If email or phone is empty, set to empty string
-                        val finalEmail = if (email.isEmpty()) "" else email
-                        val finalPhone = if (phone.isEmpty()) "" else phone
                         val updatedShelterDTO = ShelterDTO(
                             id = shelter.id,
                             sheltername = sheltername,
                             password = "",
-                            email = finalEmail,
-                            phone = finalPhone
+                            email = email,
+                            phone = phone
                         )
 
                         remoteShelterViewModel.updateShelter(
-                            updatedShelter = updatedShelterDTO,
-                            shelter = shelter,
-                            onSuccess = { newUpdatedShelter ->
-                                sheltername = newUpdatedShelter.sheltername // Update local state
-                                val shelterJson = Gson().toJson(newUpdatedShelter)
-                                val encodedShelterJson = URLEncoder.encode(shelterJson, StandardCharsets.UTF_8.toString())
-                                navController.navigate("ShelterProfile/$encodedShelterJson") {
-                                    popUpTo("ShelterProfile/{shelter}") {
-                                        inclusive = false
-                                    }
+                            updatedShelterDTO,
+                            shelter,
+                            onSuccess = { updated ->
+                                sheltername = updated.sheltername
+                                val shelterJson = Gson().toJson(updated)
+                                val encoded = URLEncoder.encode(shelterJson, StandardCharsets.UTF_8.toString())
+                                navController.navigate("ShelterProfile/$encoded") {
+                                    popUpTo("ShelterProfile/{shelter}") { inclusive = false }
                                     launchSingleTop = true
                                 }
                             },
@@ -241,12 +229,18 @@ fun ShelterUpdateData(
                             }
                         )
                     }
-                }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = TuonsBlue),
+                shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Save Changes")
+                Text(
+                    text = "Save Changes",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
             }
 
-            // Error message display
             if (errorMessage.isNotEmpty()) {
                 Text(
                     text = errorMessage,
@@ -254,34 +248,10 @@ fun ShelterUpdateData(
                     fontSize = 14.sp,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp),
+                        .padding(top = 16.dp),
                     textAlign = TextAlign.Center
                 )
             }
-        }
-    }
-
-    // Handle Update UI State
-    when (updateShelterMessageUiState) {
-        is UpdateShelterMessageUiState.Success -> {
-            LaunchedEffect(updateShelterMessageUiState) {
-                val newUpdatedShelter = (updateShelterMessageUiState as UpdateShelterMessageUiState.Success).shelter
-                sheltername = newUpdatedShelter.sheltername // Update local state
-                val shelterJson = Gson().toJson(newUpdatedShelter)
-                val encodedShelterJson = URLEncoder.encode(shelterJson, StandardCharsets.UTF_8.toString())
-                navController.navigate("ShelterProfile/$encodedShelterJson") {
-                    popUpTo("ShelterProfile/{shelter}") {
-                        inclusive = false
-                    }
-                    launchSingleTop = true
-                }
-            }
-        }
-        is UpdateShelterMessageUiState.Error -> {
-            errorMessage = (updateShelterMessageUiState as UpdateShelterMessageUiState.Error).message
-        }
-        is UpdateShelterMessageUiState.Loading -> {
-            // Optionally show a loading indicator
         }
     }
 }
