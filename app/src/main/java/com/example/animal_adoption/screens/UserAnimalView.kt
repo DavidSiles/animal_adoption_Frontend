@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -56,17 +57,16 @@ fun UserAnimalView(
     adoptionRequestViewModel: RemoteAdoptionRequestViewModel
 ) {
     val context = LocalContext.current
+    val primaryOrange = Color(0xFFFF7043)
+
     val createAdoptionRequestState by adoptionRequestViewModel.createAdoptionRequestUiState.collectAsState()
 
-    // Observar el estado de la solicitud de adopción
     LaunchedEffect(createAdoptionRequestState) {
         when (createAdoptionRequestState) {
             is CreateAdoptionRequestUiState.Success -> {
                 val request = (createAdoptionRequestState as CreateAdoptionRequestUiState.Success).request
-                Toast.makeText(context, "Solicitud de adopción enviada con éxito. ID: ${request.id}", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "¡Solicitud de adopción enviada con éxito! ID: ${request.id}", Toast.LENGTH_LONG).show()
                 adoptionRequestViewModel.resetCreateAdoptionRequestUiState()
-                // Opcional: Navegar a la pantalla de "Mis Solicitudes" después de enviar
-                // user?.id?.let { navController.navigate("UserAdoptionRequests/$it") }
             }
             is CreateAdoptionRequestUiState.Error -> {
                 val message = (createAdoptionRequestState as CreateAdoptionRequestUiState.Error).message
@@ -74,7 +74,7 @@ fun UserAnimalView(
                 adoptionRequestViewModel.resetCreateAdoptionRequestUiState()
             }
             CreateAdoptionRequestUiState.Loading -> {
-                // El botón mostrará un indicador de carga
+                // El botón mostrará un indicador de carga, no se necesita Toast aquí
             }
             CreateAdoptionRequestUiState.Idle -> { /* No hacer nada en estado inicial/idle */ }
         }
@@ -84,21 +84,27 @@ fun UserAnimalView(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(16.dp)
+                .background(MaterialTheme.colorScheme.background),
             horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = "Error al cargar datos del animal o usuario.",
-                color = MaterialTheme.colorScheme.error
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.headlineSmall
             )
             Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = { navController.popBackStack() }) {
-                Text("Volver")
+            Button(
+                onClick = { navController.popBackStack() },
+                colors = ButtonDefaults.buttonColors(containerColor = primaryOrange)
+            ) {
+                Text("Volver", color = Color.White)
             }
         }
         return
     }
+
     val shelterMap by shelterViewModel.shelterMap.collectAsState(initial = emptyMap())
 
     LaunchedEffect(Unit) {
@@ -108,10 +114,15 @@ fun UserAnimalView(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(animal.name, fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        animal.name,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = {
-                        // Navegar de vuelta a UserHome. Aseguramos que se pasa el userJson.
                         val userJson = Gson().toJson(user)
                         val encodedUserJson = URLEncoder.encode(userJson, StandardCharsets.UTF_8.toString())
                         navController.navigate("UserHome/$encodedUserJson") {
@@ -123,13 +134,14 @@ fun UserAnimalView(
                     }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back to animals list"
+                            contentDescription = "Back to animals list",
+                            tint = Color.White
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = primaryOrange,
+                    titleContentColor = Color.White
                 )
             )
         },
@@ -141,7 +153,7 @@ fun UserAnimalView(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(60.dp)
-                        .padding(horizontal = 16.dp, vertical = 8.dp), // Un poco de padding horizontal
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                     onClick = {
                         Log.d("UserAnimalView", "Botón Adoptar presionado para ${animal.name}")
                         if (user != null && animal != null) {
@@ -154,14 +166,20 @@ fun UserAnimalView(
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF4285F4),
+                        containerColor = primaryOrange,
                         contentColor = Color.White
                     ),
                     shape = RoundedCornerShape(12.dp),
                     enabled = createAdoptionRequestState !is CreateAdoptionRequestUiState.Loading
                 ) {
                     if (createAdoptionRequestState is CreateAdoptionRequestUiState.Loading) {
-                        CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 3.dp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Solicitando...", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     } else {
                         Text("Adoptar", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     }
@@ -173,30 +191,38 @@ fun UserAnimalView(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp)
+                .padding(horizontal = 24.dp, vertical = 16.dp)
                 .background(MaterialTheme.colorScheme.background)
         ) {
             Text(
-                text = "Nombre: ${animal.name}",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "REIAC: ${animal.reiac}",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Refugio: ${shelterMap[animal.shelterId]}",
-                style = MaterialTheme.typography.bodyLarge,
+                text = animal.name,
+                style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold),
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.height(16.dp))
+
             Text(
-                text = "Descripción: Un animal cariñoso en busca de un hogar. Le encanta jugar y necesita mucho amor.",
-                style = MaterialTheme.typography.bodyMedium,
+                text = "ID REIAC: ${animal.reiac}",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Refugio: ${shelterMap[animal.shelterId] ?: "Desconocido"}",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Acerca de ${animal.name}:",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Un animal cariñoso en busca de un hogar. Le encanta jugar y necesita mucho amor. Compatible con niños y otras mascotas. ¡Ven a conocerle!",
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
         }
