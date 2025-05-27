@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.animal_adoption.model.ShelterDTO
+import com.example.animal_adoption.screens.widgets.InfoCard
 import com.example.animal_adoption.screens.widgets.ShelterBottomBar
 import com.google.gson.Gson
 import java.net.URLEncoder
@@ -173,28 +174,3 @@ fun ShelterProfile(
     )
 }
 
-@Composable
-fun InfoCard(title: String, content: String, accentColor: Color, backgroundColor: Color) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = accentColor
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = content,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-    }
-}
