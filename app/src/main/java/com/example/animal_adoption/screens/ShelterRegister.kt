@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -54,7 +53,6 @@ fun ShelterRegister(
     navController: NavHostController,
     remoteShelterViewModel: RemoteShelterViewModel
 ) {
-
     val registerMessageUiState by remoteShelterViewModel.registerMessageUiState.collectAsState()
     var sheltername by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -68,240 +66,235 @@ fun ShelterRegister(
     var serverError by remember { mutableStateOf<String?>(null) }
     var connectMessage by remember { mutableStateOf(false) }
 
-        Row(
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp, start = 16.dp), // Reduced top padding
+        horizontalArrangement = Arrangement.Start
+    ) {
+        IconButton(onClick = {
+            navController.navigate("FirstScreen") {
+                popUpTo(navController.graph.startDestinationId) {
+                    inclusive = true
+                }
+                launchSingleTop = true
+            }
+        }) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Back to home"
+            )
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp, vertical = 10.dp), // Reduced padding
+        verticalArrangement = Arrangement.spacedBy(5.dp), // Tighter spacing between elements
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            painter = painterResource(R.drawable.logotuons2),
+            contentDescription = "App Logo",
+            modifier = Modifier
+                .size(120.dp) // Slightly smaller logo
+                .padding(bottom = 5.dp), // Reduced bottom padding
+            contentScale = ContentScale.Fit
+        )
+
+        Text(
+            text = "Create Shelter Account",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF333333),
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+
+        OutlinedTextField(
+            value = sheltername,
+            onValueChange = { newValue ->
+                sheltername = newValue
+                shelternameError = FieldValidations.validateName(newValue)
+            },
+            label = { Text("Shelter Name") },
+            singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(25.dp),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            IconButton(onClick = {
-                navController.navigate("FirstScreen") {
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = true
-                    }
-                    launchSingleTop = true
+                .padding(bottom = 8.dp),
+            shape = RoundedCornerShape(8.dp),
+            isError = shelternameError != null,
+            supportingText = {
+                shelternameError?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
-            }) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back to home"
-                )
             }
-        }
+        )
 
-        Column(
+        OutlinedTextField(
+            value = password,
+            onValueChange = { newValue ->
+                password = newValue
+                passwordError = FieldValidations.validatePassword(newValue)
+            },
+            label = { Text("Password") },
+            visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Image(
-                painter = painterResource(R.drawable.logotuons2),
-                contentDescription = "App Logo",
-                modifier = Modifier
-                    .size(150.dp)
-                    .padding(bottom = 32.dp),
-                contentScale = ContentScale.Fit
-            )
-
-            Text(
-                text = "Create Shelter Account",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF333333),
-                modifier = Modifier.padding(bottom = 24.dp)
-            )
-
-            OutlinedTextField(
-                value = sheltername,
-                onValueChange = { newValue ->
-                    sheltername = newValue
-                    shelternameError = FieldValidations.validateName(newValue)
-                },
-                label = { Text("Shelter Name") },
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp),
-                shape = RoundedCornerShape(12.dp),
-                isError = shelternameError != null,
-                supportingText = {
-                    shelternameError?.let {
-                        Text(
-                            text = it,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
-            )
-
-            OutlinedTextField(
-                value = password,
-                onValueChange = { newValue ->
-                    password = newValue
-                    passwordError = FieldValidations.validatePassword(newValue)
-                },
-                label = { Text("Password") },
-                visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp),
-                shape = RoundedCornerShape(12.dp),
-                isError = passwordError != null,
-                supportingText = {
-                    passwordError?.let {
-                        Text(
-                            text = it,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
-            )
-
-            OutlinedTextField(
-                value = email,
-                onValueChange = { newValue ->
-                    email = newValue
-                    emailError = FieldValidations.validateEmail(newValue)
-                },
-                label = { Text("Email") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp),
-                shape = RoundedCornerShape(12.dp),
-                isError = emailError != null,
-                supportingText = {
-                    emailError?.let {
-                        Text(
-                            text = it,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
-            )
-
-            OutlinedTextField(
-                value = phone,
-                onValueChange = { newValue ->
-                    phone = newValue
-                    phoneError = FieldValidations.validatePhone(newValue)
-                },
-                label = { Text("Phone") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp),
-                shape = RoundedCornerShape(12.dp),
-                isError = phoneError != null,
-                supportingText = {
-                    phoneError?.let {
-                        Text(
-                            text = it,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
-            )
-
-            Button(
-                onClick = {
-                    // Validate all fields
-                    shelternameError = FieldValidations.validateName(sheltername)
-                    passwordError = FieldValidations.validatePassword(password)
-                    emailError = FieldValidations.validateEmail(email)
-                    phoneError = FieldValidations.validatePhone(phone)
-                    serverError = null
-
-                    // Check if all required fields are valid
-                    if (shelternameError == null && passwordError == null && emailError == null && phoneError == null) {
-                        // If email or phone is empty, set to empty string
-                        val finalEmail = if (email.isEmpty()) "" else email
-                        val finalPhone = if (phone.isEmpty()) "" else phone
-
-                        // Proceed with registration
-                        remoteShelterViewModel.shelterRegister(
-                            sheltername,
-                            password,
-                            finalEmail,
-                            finalPhone
-                        ) { shelter ->
-                            val shelterJson = Gson().toJson(shelter)
-                            navController.navigate("ShelterHome/$shelterJson")
-                        }
-                        connectMessage = true
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4285F4),
-                    contentColor = Color.White
-                )
-            ) {
-                Text("Register", fontSize = 18.sp)
-            }
-
-            when (registerMessageUiState) {
-                is ShelterRegisterMessageUiState.Success -> {
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            shape = RoundedCornerShape(8.dp),
+            isError = passwordError != null,
+            supportingText = {
+                passwordError?.let {
                     Text(
-                        text = "Registration successful!",
-                        color = Color(0xFF2ECC71),
-                        fontSize = 16.sp,
-                        modifier = Modifier
-                            .padding(top = 16.dp)
-                            .fillMaxWidth()
-                            .wrapContentWidth(Alignment.CenterHorizontally)
+                        text = it,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
+            }
+        )
 
-                is ShelterRegisterMessageUiState.Error -> {
-                    serverError =
-                        (registerMessageUiState as ShelterRegisterMessageUiState.Error).message
-                }
-
-                is ShelterRegisterMessageUiState.Loading -> {
-                    if (connectMessage) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.padding(top = 16.dp),
-                            color = Color(0xFF4285F4)
-                        )
-                    }
+        OutlinedTextField(
+            value = email,
+            onValueChange = { newValue ->
+                email = newValue
+                emailError = FieldValidations.validateEmail(newValue)
+            },
+            label = { Text("Email") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            shape = RoundedCornerShape(8.dp),
+            isError = emailError != null,
+            supportingText = {
+                emailError?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
             }
+        )
 
-            serverError?.let {
+        OutlinedTextField(
+            value = phone,
+            onValueChange = { newValue ->
+                phone = newValue
+                phoneError = FieldValidations.validatePhone(newValue)
+            },
+            label = { Text("Phone") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            shape = RoundedCornerShape(8.dp),
+            isError = phoneError != null,
+            supportingText = {
+                phoneError?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        )
+
+        Button(
+            onClick = {
+                shelternameError = FieldValidations.validateName(sheltername)
+                passwordError = FieldValidations.validatePassword(password)
+                emailError = FieldValidations.validateEmail(email)
+                phoneError = FieldValidations.validatePhone(phone)
+                serverError = null
+
+                if (shelternameError == null && passwordError == null && emailError == null && phoneError == null) {
+                    val finalEmail = if (email.isEmpty()) "" else email
+                    val finalPhone = if (phone.isEmpty()) "" else phone
+
+                    remoteShelterViewModel.shelterRegister(
+                        sheltername,
+                        password,
+                        finalEmail,
+                        finalPhone
+                    ) { shelter ->
+                        val shelterJson = Gson().toJson(shelter)
+                        navController.navigate("ShelterHome/$shelterJson")
+                    }
+                    connectMessage = true
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp),
+            shape = RoundedCornerShape(8.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF4285F4),
+                contentColor = Color.White
+            )
+        ) {
+            Text("Register", fontSize = 16.sp)
+        }
+
+        when (registerMessageUiState) {
+            is ShelterRegisterMessageUiState.Success -> {
                 Text(
-                    text = it,
-                    color = Color(0xFFE74C3C),
+                    text = "Registration successful!",
+                    color = Color(0xFF2ECC71),
                     fontSize = 14.sp,
-                    textAlign = TextAlign.Center,
                     modifier = Modifier
+                        .padding(top = 8.dp)
                         .fillMaxWidth()
-                        .padding(top = 16.dp)
+                        .wrapContentWidth(Alignment.CenterHorizontally)
                 )
             }
 
-            Row(
-                modifier = Modifier.padding(top = 32.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Already have an account? ", color = Color(0xFF666666))
-                TextButton(
-                    onClick = { navController.navigate("ShelterLogin") }
-                ) {
-                    Text(
-                        text = "Sign In",
-                        color = Color(0xFF4285F4),
-                        fontWeight = FontWeight.Bold
+            is ShelterRegisterMessageUiState.Error -> {
+                serverError =
+                    (registerMessageUiState as ShelterRegisterMessageUiState.Error).message
+            }
+
+            is ShelterRegisterMessageUiState.Loading -> {
+                if (connectMessage) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.padding(top = 8.dp),
+                        color = Color(0xFF4285F4)
                     )
                 }
             }
         }
 
+        serverError?.let {
+            Text(
+                text = it,
+                color = Color(0xFFE74C3C),
+                fontSize = 12.sp, // Smaller font
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+            )
+        }
+
+        Row(
+            modifier = Modifier.padding(top = 16.dp), // Reduced padding
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Already have an account? ", color = Color(0xFF666666))
+            TextButton(
+                onClick = { navController.navigate("ShelterLogin") }
+            ) {
+                Text(
+                    text = "Sign In",
+                    color = Color(0xFF4285F4),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
 }
