@@ -41,6 +41,7 @@ android {
 
 dependencies {
 
+    implementation("io.coil-kt:coil-compose:2.6.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -52,6 +53,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.runtime.livedata)
     //icons
+    implementation("androidx.compose.material3:material3:1.2.1")
     implementation("androidx.compose.material:material-icons-extended:<version>")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
@@ -79,4 +81,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     // Dependencia para los iconos extendidos de Material Design
     implementation("androidx.compose.material:material-icons-extended:1.6.7")
+    implementation("androidx.compose.material3:material3:1.2.1")
+// <--- ¡Importante!
+    implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
 }

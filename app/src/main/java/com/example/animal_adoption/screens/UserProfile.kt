@@ -64,7 +64,8 @@ fun UserProfile(
     user: UserDTO?
 ) {
     var showMenu by remember { mutableStateOf(false) }
-
+    val primaryOrange = Color(0xFFFF7043)
+    val lightOrangeBackground = Color(0xFFFFCCBC)
     Scaffold(
         bottomBar = { UserBottomBar(navController, user) },
         content = { paddingValues ->
@@ -72,8 +73,7 @@ fun UserProfile(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .background(MaterialTheme.colorScheme.background)
-            ) {
+                    .background(MaterialTheme.colorScheme.background)            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize(),
@@ -82,170 +82,169 @@ fun UserProfile(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(150.dp)
-                            .background(Color(0xFFBBDEFB)),
+                            .height(180.dp)
+                            .background(primaryOrange),
                         contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(100.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.AccountCircle,
-                                contentDescription = "User Logo",
-                                tint = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.size(50.dp)
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Box(
+                                modifier = Modifier
+                                    .size(100.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.2f))
+                                    .border(2.dp, Color.White, CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.AccountCircle,
+                                    contentDescription = "User Logo",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(60.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = user?.username ?: "Username name",
+                                style = MaterialTheme.typography.headlineMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 24.sp
+                                ),
+                                color = Color.White
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = user?.username ?: "Username name",
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 24.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Id: ${user?.id ?: "N/A"}",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-                    )
-
                     Spacer(modifier = Modifier.height(24.dp))
-                    //1
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = lightOrangeBackground)
                     ) {
                         Column(
                             modifier = Modifier.padding(16.dp)
                         ) {
                             Text(
                                 text = "About Me",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = primaryOrange
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = "Stay at home dog mom who loves pilates and matcha.",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
-                    //2
-                    Spacer(modifier = Modifier.height(8.dp))
 
+
+
+
+
+
+                    Spacer(modifier = Modifier.height(8.dp))
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0)) // Naranjito claro
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = lightOrangeBackground)
                     ) {
                         Column(
                             modifier = Modifier.padding(16.dp)
                         ) {
                             Text(
                                 text = "Birthday",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = primaryOrange
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = "21/10/2003.",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    //3
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0)) // Naranjito claro
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = lightOrangeBackground)
                     ) {
                         Column(
                             modifier = Modifier.padding(16.dp)
                         ) {
                             Text(
                                 text = "City",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = primaryOrange
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = "Barcelona.",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    //4
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0)) // Naranjito claro
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = lightOrangeBackground)
                     ) {
                         Column(
                             modifier = Modifier.padding(16.dp)
                         ) {
                             Text(
                                 text = "Email",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = primaryOrange
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = "yourEmail@gmail.com",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
-
-
                     Spacer(modifier = Modifier.weight(0.5f))
                 }
 
-                // Icono y menú desplegable en la esquina superior derecha
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp, end = 150.dp)
-                        .align(Alignment.TopEnd)
+                        .fillMaxWidth() // Asegura que el Box ocupe todo el ancho
+                        .align(Alignment.TopEnd) // Lo alinea al TopEnd del Box padre (el Box principal de Scaffold content)
+                        .padding(top = 10.dp, end = 10.dp) // Pequeño padding para no pegar al borde
                 ) {
-                    IconButton(onClick = { showMenu = !showMenu }) {
+                    IconButton(
+                        onClick = { showMenu = !showMenu },
+                        modifier = Modifier.align(Alignment.CenterEnd) // Alinea el botón a la derecha dentro de este Box
+                    ) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
                             contentDescription = "Opciones",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = Color.White
                         )
                     }
                     DropdownMenu(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false },
-                        modifier = Modifier.align(Alignment.TopEnd),
-                        shadowElevation = MenuDefaults.ShadowElevation,
-                        offset =  DpOffset(10.dp, 10.dp)
+                        offset =  DpOffset(x = (-10).dp, y = 0.dp)
                     ) {
                         DropdownMenuItem(
                             text = { Text("Editar perfil") },
@@ -271,12 +270,12 @@ fun UserProfile(
                                 Icon(
                                     imageVector = Icons.Default.ExitToApp,
                                     contentDescription = "Exit",
-                                    tint = Color.Red
+                                    tint = primaryOrange
                                 )
                             },
                             text = { Text(
                                 text = "Exit",
-                                color = Color.Red
+                                color = primaryOrange
                             ) },
                             onClick = {
                                 Log.d("UserProfile", "Opción seleccionada: Cerrar sesión")

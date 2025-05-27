@@ -1,24 +1,33 @@
 package com.example.animal_adoption.screens.widgets
 
-
 import android.util.Log
-import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.ListAlt
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.animal_adoption.model.ShelterDTO
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.animal_adoption.model.UserDTO
 import com.google.gson.Gson
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+
+data class UserBottomNavItem(
+    val label: String,
+    val icon: ImageVector,
+    val route: String
+)
 
 @Composable
 fun UserBottomBar(
@@ -27,93 +36,55 @@ fun UserBottomBar(
 ) {
     val userJson = user?.let {
         URLEncoder.encode(Gson().toJson(it), StandardCharsets.UTF_8.toString())
-    }
+    } ?: "null"
 
-    BottomAppBar {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(vertical = 4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ){
-                IconButton(onClick = { navController.navigate("UserHome/$userJson") }) {
-                    Icon(Icons.Default.Home, contentDescription = "Home")
-                }
-                Text(
-                    text = "Home",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
+    val primaryOrange = Color(0xFFFF7043)
+    val items = listOf(
+        UserBottomNavItem("Home", Icons.Default.Home, "UserHome/$userJson"),
+        UserBottomNavItem("Animals", Icons.Default.Search, "AdoptionSearchBarUser/$userJson"), // Usamos Icons.Default.Search para "Animals"
+        UserBottomNavItem("My Requests", Icons.Default.Pets, "UserAdoptionRequests/${user?.id}"),
+        UserBottomNavItem("Profile", Icons.Default.AccountCircle, "UserProfile/$userJson")
+    )
+
+    NavigationBar(
+        containerColor = primaryOrange,
+        tonalElevation = 4.dp
+    ) {
+        items.forEach { item ->
+            val contentColor = if (currentRoute == item.route ||
+                (item.route.contains("UserHome") && currentRoute?.startsWith("UserHome") == true) ||
+                (item.route.contains("AdoptionSearchBarUser") && currentRoute?.startsWith("AdoptionSearchBarUser") == true) ||
+                (item.route.contains("UserAdoptionRequests") && currentRoute?.startsWith("UserAdoptionRequests") == true) ||
+                (item.route.contains("UserProfile") && currentRoute?.startsWith("UserProfile") == true)) {
+                Color.White
+            } else {
+                Color.White.copy(alpha = 0.7f)
             }
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(vertical = 4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-
-                IconButton(onClick = { navController.navigate("AdoptionSearchBarUser/$userJson") }) {
-                    Icon(Icons.Default.Menu, contentDescription = "SearchBar")
-                }
-                
-                Text(
-                    text = "Animals",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(vertical = 4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                IconButton(onClick = {
-                    if (user != null) {
-                        Log.d("UserBottomBar", "Navigating to UserAdoptionRequests for userId: ${user.id}")
-                        navController.navigate("UserAdoptionRequests/${user.id}") {
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    } else {
+            NavigationBarItem(
+                icon = { Icon(item.icon, contentDescription = item.label, tint = contentColor) },
+                label = { Text(item.label, style = MaterialTheme.typography.labelMedium, color = contentColor) },
+                selected = currentRoute == item.route ||
+                        (item.route.contains("UserHome") && currentRoute?.startsWith("UserHome") == true) ||
+                        (item.route.contains("AdoptionSearchBarUser") && currentRoute?.startsWith("AdoptionSearchBarUser") == true) ||
+                        (item.route.contains("UserAdoptionRequests") && currentRoute?.startsWith("UserAdoptionRequests") == true) ||
+                        (item.route.contains("UserProfile") && currentRoute?.startsWith("UserProfile") == true),
+                onClick = {
+                    if (item.route.contains("UserAdoptionRequests") && user == null) {
                         Log.e("UserBottomBar", "User is null, cannot navigate to UserAdoptionRequests.")
+                        return@NavigationBarItem
                     }
-                }) {
-                    Icon(Icons.Default.ListAlt, contentDescription = "My Requests") // Icono para solicitudes
-                }
-                Text(
-                    text = "My Requests",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
 
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(vertical = 4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                IconButton(onClick = { navController.navigate("UserProfile/$userJson") }) {
-                    Icon(Icons.Default.Person, contentDescription = "Profile")
+                    navController.navigate(item.route) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                 }
-                Text(
-                    text = "Profile",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
+            )
         }
     }
 }
