@@ -275,9 +275,9 @@ fun AdoptionRequestItem(request: AdoptionRequestDTO) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
             }
 
-            Text("Date: ${request.requestDate}",
+            /*Text("Date: ${request.requestDate}",
                 style = MaterialTheme.typography.bodySmall,
-                fontFamily = FontFamily.Default)
+                fontFamily = FontFamily.Default)*/
         }
     }
 }
